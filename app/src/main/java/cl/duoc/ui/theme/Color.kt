@@ -3,12 +3,12 @@ package cl.duoc.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val Primario = Color(0xFFFFFFFF)
-val PrimarioOscuro = Color(0xFFFFFFFF)
-val PrimarioClaro = Color(0xFFFFFFFF)
+val PrimarioOscuro = Color(0xFF000000)
+val PrimarioClaro = Color(0xFFF5F8FD)
 
-val Secundario = Color(0xFFFFFFFF)
-val Acento = Color(0xFFFFFFFF)
-val AcentoOscuro = Color(0xFFFFFFFF)
+val Secundario = Color(0xFF0059D4)
+val Acento = Color(0xFF9FC6FD)
+val AcentoOscuro = Color(0xFF003F95)
 
 val Blanco = Color(0xFFFFFFFF)
 val FondoClaro = Color(0xFFF6F5FB)
