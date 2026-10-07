@@ -1,3 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-    <string name="app_name">FintechPagoFlex</string>
+
+    <!--General-->
+    <string name="app_name">PagoFlex</string>
+    <string name="btn_aceptar">Aceptar</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_volver">Volver</string>
+    <string name="btn_reintentar">Reintentar</string>
+    <string name="btn_guardar">Guardar</string>
+    <string name="btn_ver_detalle">Ver detalle</string>
+    <string name="cargando">Cargando…</string>
+    <string name="filtro_todos">Todos</string>
+    <string name="filtro_todas">Todas</string>
+    <string name="sin_datos">Aún no hay nada por mostrar aquí.</string>
+    <string name="error_generico">Algo no salió como esperábamos. Inténtalo de nuevo.</string>
+    <string name="aviso_datos_ficticios">Versión de demostración con datos ficticios</string>
+
+    <!--Sesion demo-->
+    <string name="sesion_titulo">Elige cómo quieres entrar</string>
+    <string name="sesion_subtitulo">Sesión de demostración. No necesitas clave ni registro.</string>
+    <string name="btn_entrar_como">Entrar como %1$s</string>
+    <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <string name="sesion_cerrada">Cerraste tu sesión.</string>
+
+    <!--Roles-->
+    <string name="rol_usuario_final">Persona que paga</string>
+    <string name="rol_usuario_final_desc">Revisa tus compromisos, paga y encuentra tus comprobantes.</string>
+    <string name="rol_agente">Agente PagoFlex</string>
+    <string name="rol_agente_desc">Gestiona los reportes enviados por las personas.</string>
+    <string name="rol_ejecutivo">Ejecutivo de la empresa cliente</string>
+    <string name="rol_ejecutivo_desc">Registra compromisos y sigue la cobranza de tu empresa.</string>
+
+    <!--Navegacion-->
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_compromisos">Compromisos</string>
+    <string name="nav_historial">Historial</string>
+    <string name="nav_perfil">Perfil</string>
+    <string name="nav_reportes">Reportes</string>
+    <string name="nav_cobranza">Cobranza</string>
+
+    <!--Perfil-->
+    <string name="titulo_perfil">Mi perfil</string>
+    <string name="seccion_sobre_mi">Sobre mí</string>
+    <string name="perfil_rut">RUT</string>
+    <string name="perfil_correo">Correo electrónico</string>
+    <string name="perfil_telefono">Teléfono</string>
+    <string name="perfil_comuna">Comuna</string>
+    <string name="perfil_miembro_desde">Con PagoFlex desde %1$s</string>
+    <string name="perfil_area">Área</string>
+    <string name="perfil_empresa">Empresa</string>
+    <string name="perfil_cargo">Cargo</string>
+    <string name="area_soporte">Soporte</string>
+    <string name="area_comercial">Comercial</string>
+
+    <!--Estados-->
+    <string name="estado_pendiente">Pendiente</string>
+    <string name="estado_vencido">Vencido</string>
+    <string name="estado_pagado">Pagado</string>
+    <string name="estado_en_revision">En revisión</string>
+    <string name="estado_anulado">Anulado</string>
+
+    <!--Portal pagos-->
+    <string name="canal_app">App</string>
+    <string name="canal_portal">Portal de pagos</string>
+    <string name="canal_agente">Agente conversacional</string>
+
+    <!--Inicio usuario final-->
+    <string name="inicio_saludo">Hola, %1$s</string>
+    <string name="inicio_total_mes">Total por pagar este mes</string>
+    <string name="inicio_proximo_vencimiento">Próximo vencimiento</string>
+    <string name="inicio_proximo_detalle">%1$s - vence el %2$s</string>
+    <string name="inicio_sin_pendientes">¡Estás al día! No tienes pagos pendientes.</string>
+    <string name="inicio_ver_todo">Ver todos mis compromisos</string>
+    <plurals name="inicio_vencidos">
+        <item quantity="one">Tienes %1$d compromiso por regularizar</item>
+        <item quantity="other">Tienes %1$d compromisos por regularizar</item>
+    </plurals>
+    <plurals name="inicio_por_empresa">
+        <item quantity="one">%1$d compromiso</item>
+        <item quantity="other">%1$d compromisos</item>
+    </plurals>
+
+    <!--Sin conexion-->
+    <string name="ultima_actualizacion">Última actualización: %1$s</string>
+    <string name="sin_conexion_titulo">Sin conexión</string>
+    <string name="sin_conexion_aviso">Estás viendo tu última información conocida, actualizada el %1$s. Los montos podrían haber cambiado.</string>
+
+    <!--Compromisos-->
+    <string name="titulo_compromisos">Mis compromisos</string>
+    <string name="compromiso_cuota">Cuota %1$d/%2$d</string>
+    <string name="compromiso_vence">Vence el %1$s</string>
+    <string name="compromiso_folio">Folio %1$s</string>
+    <string name="detalle_titulo">Detalle del compromiso</string>
+    <string name="detalle_empresa">Empresa</string>
+    <string name="detalle_concepto">Concepto</string>
+    <string name="detalle_cuota">Cuota</string>
+    <string name="detalle_monto">Monto</string>
+    <string name="detalle_vencimiento">Vencimiento</string>
+    <string name="detalle_estado">Estado</string>
+    <string name="detalle_dias_atraso">Días de atraso</string>
+    <string name="detalle_recargo">Recargo por atraso</string>
+    <string name="detalle_total_pagar">Total a pagar</string>
+    <string name="detalle_pagado_el">Pagado el %1$s por %2$s</string>
+    <string name="detalle_a_tiempo">Pago a tiempo</string>
+    <string name="detalle_con_atraso">Pago con atraso</string>
+    <string name="detalle_contacto_empresa">Contacto de la empresa</string>
+
+    <!--Pago-->
+    <string name="btn_pagar">Pagar</string>
+    <string name="btn_pagar_monto">Pagar %1$s</string>
+    <string name="pago_titulo">Confirmar pago</string>
+    <string name="pago_resumen">Vas a pagar %1$s a %2$s</string>
+    <string name="pago_incluye_recargo">Incluye un recargo de %1$s</string>
+    <string name="pago_simulado_nota">Este es un pago de demostración. No se cobra dinero ni se piden datos de tarjetas o cuentas.</string>
+    <string name="pago_medio">Medio de pago</string>
+    <string name="btn_confirmar_pago">Confirmar pago</string>
+    <string name="pago_exitoso">¡Pago realizado! Ya está listo tu comprobante.</string>
+    <string name="btn_ver_comprobante">Ver comprobante</string>
+    <string name="pago_bloqueado_revision">Este compromiso está en revisión por un reporte tuyo. Podrás pagarlo cuando se resuelva.</string>
+    <string name="pago_bloqueado_anulado">Este compromiso fue dejado sin efecto por la empresa, así que no hay nada que pagar.</string>
+    <string name="pago_bloqueado_pagado">Este compromiso ya está pagado.</string>
+    <string name="pago_bloqueado_orden">Primero debes pagar la cuota %1$s de %2$s, que es la más antigua.</string>
+
+    <!--Comprobante-->
+    <string name="comprobante_titulo">Comprobante de pago</string>
+    <string name="comprobante_numero">N.º de comprobante</string>
+    <string name="comprobante_fecha_hora">Fecha y hora</string>
+    <string name="comprobante_monto_pagado">Monto pagado</string>
+    <string name="comprobante_canal">Canal</string>
+
+    <!--Historial-->
+    <string name="titulo_historial">Historial de pagos</string>
+    <string name="historial_filtro_empresa">Empresa</string>
+    <string name="historial_filtro_periodo">Período</string>
+    <string name="historial_vacio">No encontramos pagos con estos filtros.</string>
+    <string name="historial_anulado_nota">Anulado por la empresa</string>
+
+    <!--Cumplimiento-->
+    <string name="cumplimiento_titulo">Mi cumplimiento</string>
+    <string name="cumplimiento_porcentaje">%1$s %%</string>
+    <string name="cumplimiento_detalle">%1$d de %2$d pagos a tiempo en los últimos 12 meses</string>
+    <string name="cumplimiento_insuficiente">Aún no tienes historial suficiente para mostrar tu cumplimiento.</string>
+    <string name="categoria_ejemplar">Ejemplar</string>
+    <string name="categoria_al_dia">Al día</string>
+    <string name="categoria_en_camino">En camino</string>
+
+    <!--Reporte usuario-->
+    <string name="btn_reportar_problema">Reportar un problema</string>
+    <string name="reporte_titulo">Reportar un problema</string>
+    <string name="reporte_motivo_label">¿Qué pasó?</string>
+    <string name="reporte_motivo_pagado_otro_medio">Ya pagué por otro medio</string>
+    <string name="reporte_motivo_no_reconozco">No reconozco este cobro</string>
+    <string name="reporte_motivo_monto">El monto no corresponde</string>
+    <string name="reporte_motivo_otro">Otro</string>
+    <string name="reporte_comentario_hint">Cuéntanos más (opcional)</string>
+    <string name="reporte_comentario_obligatorio_hint">Cuéntanos qué pasó</string>
+    <string name="btn_enviar_reporte">Enviar reporte</string>
+    <string name="reporte_enviado">Recibimos tu reporte. Te avisaremos cuando tengamos una respuesta.</string>
+    <string name="reporte_existente">Ya tienes un reporte para este compromiso. Aquí puedes ver cómo va.</string>
+    <string name="reporte_numero">Reporte %1$s</string>
+    <string name="reporte_respuesta_titulo">Respuesta de PagoFlex</string>
+    <string name="reporte_sin_respuesta">Aún estamos revisando tu caso.</string>
+
+    <!--Estado reporte-->
+    <string name="estado_reporte_abierto">Abierto</string>
+    <string name="estado_reporte_en_gestion">En gestión</string>
+    <string name="estado_reporte_resuelto">Resuelto</string>
+
+    <!--Agente-->
+    <string name="agente_titulo_reportes">Reportes de problemas</string>
+    <string name="agente_filtro_estado">Estado</string>
+    <string name="agente_reporte_atrasado">Más de 2 días hábiles sin gestionar</string>
+    <string name="agente_reporte_usuario">Persona: %1$s</string>
+    <string name="agente_reporte_compromiso">Compromiso %1$s</string>
+    <string name="agente_reporte_creado">Creado el %1$s</string>
+    <string name="agente_responsable">Responsable: %1$s</string>
+    <string name="btn_tomar_reporte">Tomar reporte</string>
+    <string name="agente_respuesta_hint">Respuesta para la persona</string>
+    <string name="btn_resolver_reporte">Dar por resuelto</string>
+    <string name="agente_reporte_tomado">Tomaste el reporte. Ahora está en gestión.</string>
+    <string name="agente_reporte_resuelto">Reporte resuelto y respuesta enviada.</string>
+    <string name="agente_indicador_persona">Indicador de cumplimiento de la persona</string>
+    <string name="agente_coordinar_anulacion">Coordinar anulación con la empresa</string>
+    <string name="agente_coordinacion_simulada">Coordinación simulada con el ejecutivo de la empresa.</string>
+    <plurals name="agente_cantidad_reportes">
+        <item quantity="one">%1$d reporte</item>
+        <item quantity="other">%1$d reportes</item>
+    </plurals>
+
+    <!--Ejecutivo-->
+    <string name="ejecutivo_titulo_compromisos">Compromisos de %1$s</string>
+    <string name="ejecutivo_filtro_estado">Estado</string>
+    <string name="ejecutivo_filtro_mes">Mes de vencimiento</string>
+    <string name="ejecutivo_persona">Persona: %1$s</string>
+    <string name="ejecutivo_reporte_asociado">Reporte de la persona</string>
+
+    <!--Registro compromiso-->
+    <string name="btn_nuevo_compromiso">Nuevo compromiso</string>
+    <string name="registro_titulo">Registrar compromiso</string>
+    <string name="registro_rut_persona">RUT de la persona</string>
+    <string name="registro_concepto">Concepto</string>
+    <string name="registro_monto">Monto</string>
+    <string name="registro_vencimiento">Fecha de vencimiento</string>
+    <string name="registro_numero_cuota">N.º de cuota (opcional)</string>
+    <string name="registro_total_cuotas">Total de cuotas (opcional)</string>
+    <string name="registro_datos_persona">Datos de la persona nueva</string>
+    <string name="registro_nombre">Nombre completo</string>
+    <string name="registro_correo">Correo electrónico</string>
+    <string name="registro_telefono">Teléfono</string>
+    <string name="btn_registrar_compromiso">Registrar compromiso</string>
+    <string name="registro_exitoso">Compromiso registrado con el folio %1$s</string>
+
+    <!--Anular compromiso-->
+    <string name="btn_anular_compromiso">Anular compromiso</string>
+    <string name="anulacion_titulo">Anular compromiso</string>
+    <string name="anulacion_motivo_label">Motivo de la anulación</string>
+    <string name="anulacion_motivo_repactacion">Repactación</string>
+    <string name="anulacion_motivo_error">Error de registro</string>
+    <string name="anulacion_motivo_pagado_directo">Pagado directamente a la empresa</string>
+    <string name="anulacion_motivo_otro">Otro</string>
+    <string name="anulacion_comentario_hint">Comentario</string>
+    <string name="btn_confirmar_anulacion">Confirmar anulación</string>
+    <string name="anulacion_exitosa">Compromiso anulado.</string>
+    <string name="anulacion_no_permitida_pagado">Un compromiso pagado no se puede anular.</string>
+
+    <!--Resumen cobro-->
+    <string name="cobranza_titulo">Cobranza de %1$s</string>
+    <string name="cobranza_mes">Mes</string>
+    <string name="cobranza_pagados">Pagados</string>
+    <string name="cobranza_pendientes">Pendientes</string>
+    <string name="cobranza_vencidos">Vencidos</string>
+    <string name="cobranza_monto_recaudado">Monto recaudado</string>
+    <string name="cobranza_tasa">Tasa de cobranza</string>
+
+    <!--Errores-->
+    <string name="error_campo_obligatorio">Este campo es obligatorio</string>
+    <string name="error_rut_invalido">Revisa el RUT: parece que no es válido</string>
+    <string name="error_monto_invalido">El monto debe ser mayor que cero</string>
+    <string name="error_fecha_pasada">La fecha de vencimiento no puede ser anterior a hoy</string>
+    <string name="error_cuota_mayor_total">La cuota no puede ser mayor que el total de cuotas</string>
+    <string name="error_compromiso_duplicado">Este compromiso ya está registrado</string>
+    <string name="error_comentario_obligatorio">Cuéntanos qué pasó para poder ayudarte</string>
+    <string name="error_sin_permiso">No tienes acceso a esta información</string>
+
+    <!--TalkBack-->
+    <string name="cd_logo">Logo de PagoFlex</string>
+    <string name="cd_avatar">Foto de perfil</string>
+    <string name="cd_volver">Volver a la pantalla anterior</string>
+    <string name="cd_icono_estado">Estado: %1$s</string>
+    <string name="cd_filtrar">Abrir filtros</string>
+    <string name="cd_comprobante">Comprobante del pago</string>
+    <string name="cd_sin_conexion">Sin conexión a internet</string>
+    <string name="cd_campo_rut_ayuda">Ingresa el RUT con guion y dígito verificador</string>
+    <string name="cd_monto">Monto: %1$s</string>
+    <string name="cd_vencimiento">Vence el %1$s</string>
+    <string name="cd_rol_seleccion">Entrar con el rol %1$s</string>
+    <string name="cd_alerta_atrasado">Reporte con más de dos días hábiles sin gestionar</string>
+
 </resources>
