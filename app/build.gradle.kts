@@ -55,4 +55,6 @@ dependencies {
     //Librerias nuevas para manejo del ciclo de vida del viewmodel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

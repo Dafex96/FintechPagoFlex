@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
-    <style name="Theme.FintechPagoFlex" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.PagoFlex" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/pf_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Theme.PagoFlex.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/pf_splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/"icono_app"</item>
+        <item name="postSplashScreenTheme">@style/Theme.PagoFlex</item>
+    </style>
+
 </resources>
