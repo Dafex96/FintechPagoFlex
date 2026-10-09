@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!--Configuracion avisos-->
+    <string name="avisos_titulo">Avisos de vencimiento</string>
+    <string name="avisos_intro">Elige cuándo quieres que te recordemos tus pagos para organizarte con calma.</string>
+    <string name="avisos_switch_label">Recibir avisos de vencimiento</string>
+    <string name="avisos_switch_activo">Avisos activados</string>
+    <string name="avisos_switch_inactivo">Avisos desactivados</string>
+    <string name="avisos_anticipacion_titulo">¿Con cuánta anticipación quieres enterarte?</string>
+    <string name="avisos_recomendado">Recomendado</string>
+    <string name="avisos_desactivados_nota">No recibirás avisos de la app. Seguirás viendo tus compromisos cuando entres.</string>
+
+    <!--Opciones de anticipacion-->
+    <plurals name="avisos_opcion_dias">
+        <item quantity="one">%1$d día antes</item>
+        <item quantity="other">%1$d días antes</item>
+    </plurals>
+
+    <!--Reglas avisos-->
+    <string name="avisos_reglas_titulo">Cómo cuidamos tu tiempo</string>
+    <string name="avisos_regla_maximo">Te enviaremos como máximo un aviso al día por cada compromiso.</string>
+    <string name="avisos_regla_horario">No te escribiremos entre las 22:00 y las 08:00.</string>
+    <string name="avisos_regla_estados">No te avisaremos de compromisos ya pagados, anulados o en revisión.</string>
+
+    <!--Guardado-->
+    <string name="avisos_guardado">Listo, guardamos tus preferencias.</string>
+    <string name="avisos_error_guardar">No pudimos guardar tus preferencias. Inténtalo de nuevo.</string>
+    <string name="avisos_resumen_activo">Te avisamos %1$s</string>
+    <string name="avisos_vista_previa_titulo">Así se verá tu aviso</string>
+
+    <!--Permiso notificaciones-->
+    <string name="permiso_notif_titulo">¿Te enviamos los avisos?</string>
+    <string name="permiso_notif_explicacion">Para recordarte tus vencimientos necesitamos tu permiso para enviar notificaciones. Puedes cambiarlo cuando quieras.</string>
+    <string name="permiso_notif_btn_permitir">Permitir notificaciones</string>
+    <string name="permiso_notif_btn_ahora_no">Ahora no</string>
+    <string name="permiso_notif_denegado">Las notificaciones están desactivadas en tu teléfono, así que no podremos avisarte.</string>
+    <string name="permiso_notif_btn_ajustes">Ir a ajustes</string>
+
+    <!--Canal notificaciones-->
+    <string name="notif_canal_avisos_nombre">Avisos de vencimiento</string>
+    <string name="notif_canal_avisos_desc">Recordatorios de tus próximos pagos.</string>
+    <string name="notif_canal_gestion_nombre">Novedades de tus gestiones</string>
+    <string name="notif_canal_gestion_desc">Pagos registrados, reportes con respuesta y compromisos nuevos.</string>
+    <string name="notif_canal_trabajo_nombre">Alertas de trabajo</string>
+    <string name="notif_canal_trabajo_desc">Avisos internos para agentes y ejecutivos.</string>
+
+    <!--Notificaciones usuario final-->
+    <!--Prioridad alta, próximo vencimiento-->
+    <string name="notif_vence_titulo">Tu pago está cerca</string>
+    <plurals name="notif_vence_texto">
+        <item quantity="one">Tu cuota con %2$s vence mañana (%3$s). Pagar toma solo un minuto.</item>
+        <item quantity="other">Tu cuota con %2$s vence en %1$d días (%3$s). Pagar toma solo un minuto.</item>
+    </plurals>
+
+    <!--Prioridad alta, vence hoy-->
+    <string name="notif_vence_hoy_titulo">Hoy es el día de tu pago</string>
+    <string name="notif_vence_hoy_texto">Tu cuota con %1$s vence hoy (%2$s). Paga a tiempo y mantén tu buen historial.</string>
+
+    <!--Prioridad media-->
+    <string name="notif_vencido_titulo">Un compromiso espera ser regularizado</string>
+    <string name="notif_vencido_texto">Tu cuota con %1$s ya venció. Puedes ponerte al día en un par de toques.</string>
+    <string name="notif_pago_titulo">¡Pago registrado!</string>
+    <string name="notif_pago_texto">Recibimos tu pago de %1$s a %2$s. Tu comprobante ya está disponible.</string>
+    <string name="notif_reporte_resuelto_titulo">Tu reporte tiene respuesta</string>
+    <string name="notif_reporte_resuelto_texto">Revisamos el reporte %1$s. Entra para ver la respuesta.</string>
+
+    <!--Prioridad baja-->
+    <string name="notif_compromiso_nuevo_titulo">Tienes un compromiso nuevo</string>
+    <string name="notif_compromiso_nuevo_texto">%1$s registró un compromiso por %2$s con vencimiento el %3$s.</string>
+
+    <!--Notificaciones agente-->
+    <string name="notif_agente_nuevo_titulo">Nuevo reporte por revisar</string>
+    <string name="notif_agente_nuevo_texto">Llegó el reporte %1$s. Puedes tomarlo cuando estés listo.</string>
+    <string name="notif_agente_atrasado_titulo">Un reporte necesita atención</string>
+    <string name="notif_agente_atrasado_texto">El reporte %1$s lleva más de 2 días hábiles sin gestionar.</string>
+
+    <!--Notificaciones ejecutivo-->
+    <string name="notif_ejecutivo_revision_titulo">Un compromiso quedó en revisión</string>
+    <string name="notif_ejecutivo_revision_texto">El compromiso %1$s está en revisión por un reporte de la persona.</string>
+
+    <!--Acciones dentro de la notificacion-->
+    <string name="notif_accion_pagar">Pagar ahora</string>
+    <string name="notif_accion_ver">Ver detalle</string>
+
+    <!--Talkback-->
+    <string name="cd_avisos_switch">Activar o desactivar los avisos de vencimiento</string>
+    <string name="cd_avisos_selector">Selector de anticipación del aviso</string>
+    <string name="cd_avisos_opcion_seleccionada">%1$s, seleccionado</string>
+    <string name="cd_avisos_opcion_no_seleccionada">%1$s, no seleccionado</string>
+    <string name="cd_avisos_icono">Ícono de campana de avisos</string>
+
+</resources>

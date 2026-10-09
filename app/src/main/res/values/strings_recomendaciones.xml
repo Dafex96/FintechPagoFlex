@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!--Persona-->
+    <string name="reco_titulo">Recomendar una organización</string>
+    <string name="reco_intro">¿Pagas a un jardín, club, comunidad o administrador por transferencia? Cuéntanos y le mostramos lo fácil que puede ser cobrar con PagoFlex.</string>
+    <string name="reco_btn_recomendar">Recomendar una organización</string>
+    <string name="reco_mis_titulo">Mis recomendaciones</string>
+    <string name="reco_mis_vacio">Aún no has recomendado ninguna organización. ¡Anímate a hacer la primera!</string>
+    <string name="reco_numero">Recomendación %1$s</string>
+    <string name="reco_enviada_el">Enviada el %1$s</string>
+    <string name="reco_nombre_rubro_comuna">%1$s · %2$s</string>
+    <plurals name="reco_cupo_restante">
+        <item quantity="one">Te queda %1$d recomendación este mes</item>
+        <item quantity="other">Te quedan %1$d recomendaciones este mes</item>
+    </plurals>
+    <string name="reco_cupo_agotado">Llegaste al máximo de 5 recomendaciones este mes. Podrás enviar más el próximo mes.</string>
+
+    <!--Formulario recomendacion-->
+    <string name="reco_form_titulo">Nueva recomendación</string>
+    <string name="reco_seccion_organizacion">Sobre la organización</string>
+    <string name="reco_campo_nombre">Nombre de la organización</string>
+    <string name="reco_campo_rubro">Rubro</string>
+    <string name="reco_campo_comuna">Comuna</string>
+    <string name="reco_campo_rut">RUT de la organización (opcional)</string>
+    <string name="reco_seccion_contacto">Persona de contacto (opcional)</string>
+    <string name="reco_contacto_ayuda">Si conoces a alguien de la organización, puedes dejarnos sus datos para que lo contactemos.</string>
+    <string name="reco_campo_contacto_nombre">Nombre del contacto</string>
+    <string name="reco_campo_contacto_correo">Correo del contacto</string>
+    <string name="reco_campo_contacto_telefono">Teléfono del contacto</string>
+    <string name="reco_autoriza_contacto">Declaro que esta persona me autorizó a compartir sus datos para que PagoFlex la contacte</string>
+    <string name="reco_privacidad_nota">Solo guardamos datos de contacto si nos confirmas esa autorización. Nunca los usamos para otra cosa.</string>
+    <string name="reco_btn_enviar">Enviar recomendación</string>
+    <string name="reco_enviada">¡Gracias! Recibimos tu recomendación. Te contaremos cómo avanza.</string>
+    <string name="reco_ya_existe">Ya recomendaste esta organización. Aquí puedes ver en qué va.</string>
+    <string name="reco_btn_ver_existente">Ver mi recomendación</string>
+
+    <!--Estados recomendacion-->
+    <string name="reco_estado_recibida">Recibida</string>
+    <string name="reco_estado_contactada">Contactada</string>
+    <string name="reco_estado_en_evaluacion">En evaluación</string>
+    <string name="reco_estado_se_unio">Se unió</string>
+    <string name="reco_estado_descartada">Descartada</string>
+
+    <!--Descripcion estado-->
+    <string name="reco_estado_recibida_desc">Tenemos tu recomendación y pronto un agente la revisará.</string>
+    <string name="reco_estado_contactada_desc">Un agente ya se comunicó con la organización.</string>
+    <string name="reco_estado_en_evaluacion_desc">Estamos conversando para ver si PagoFlex es una buena opción para ellos.</string>
+    <string name="reco_estado_se_unio_desc">¡La organización ya cobra con PagoFlex gracias a ti!</string>
+    <string name="reco_estado_descartada_desc">Esta vez no pudimos avanzar con esta organización.</string>
+
+    <!--Detalle recomendacion persona-->
+    <string name="reco_detalle_titulo">Detalle de la recomendación</string>
+    <string name="reco_detalle_organizacion">Organización</string>
+    <string name="reco_detalle_rubro">Rubro</string>
+    <string name="reco_detalle_comuna">Comuna</string>
+    <string name="reco_detalle_estado_actual">Estado actual</string>
+    <string name="reco_detalle_motivo_descarte">Motivo: %1$s</string>
+    <string name="reco_detalle_seguimiento">Seguimiento</string>
+    <string name="reco_detalle_cambio">%1$s · %2$s</string>
+    <string name="reco_detalle_reconocimiento">¡Obtuviste un reconocimiento por esta recomendación!</string>
+    <string name="reco_btn_ver_reconocimiento">Ver mi reconocimiento</string>
+    <string name="reco_detalle_gracias_descartada">Gracias por pensar en PagoFlex. Puedes recomendar otra organización cuando quieras.</string>
+
+    <!--Gestion agente-->
+    <string name="agente_reco_titulo">Recomendaciones recibidas</string>
+    <string name="agente_reco_filtro_estado">Estado</string>
+    <string name="agente_reco_vacio">No hay recomendaciones con este filtro.</string>
+    <string name="agente_reco_persona">Recomendada por: %1$s</string>
+    <string name="agente_reco_ultimo_cambio">Último cambio: %1$s por %2$s</string>
+    <string name="agente_reco_sin_cambios">Aún sin cambios de estado</string>
+    <string name="agente_reco_contacto_titulo">Contacto de la organización</string>
+    <string name="agente_reco_sin_contacto">La persona no dejó datos de contacto.</string>
+    <string name="agente_reco_historial_titulo">Historial de estados</string>
+    <string name="agente_reco_cambiar_estado">Cambiar estado</string>
+    <string name="agente_reco_pasar_a">Pasar a %1$s</string>
+    <string name="agente_reco_btn_descartar">Descartar</string>
+    <string name="agente_reco_motivo_hint">Motivo del descarte</string>
+    <string name="agente_reco_btn_confirmar">Confirmar cambio</string>
+    <string name="agente_reco_estado_cambiado">Listo, la recomendación pasó a %1$s.</string>
+    <string name="agente_reco_se_unio_aviso">La persona recibirá un reconocimiento por esta recomendación.</string>
+    <string name="agente_reco_estado_final">Esta recomendación ya está cerrada y no admite más cambios.</string>
+    <string name="agente_reco_no_salta">Solo puedes avanzar a la etapa siguiente: %1$s.</string>
+
+    <!--Notificaciones-->
+    <string name="notif_reco_titulo">Novedades de tu recomendación</string>
+    <string name="notif_reco_texto">Tu recomendación de %1$s ahora está %2$s.</string>
+    <string name="notif_reco_se_unio_titulo">¡Tu recomendación dio frutos!</string>
+    <string name="notif_reco_se_unio_texto">%1$s se unió a PagoFlex gracias a ti. Entra a ver tu reconocimiento.</string>
+
+    <!--Errores-->
+    <string name="reco_error_nombre_obligatorio">Escribe el nombre de la organización</string>
+    <string name="reco_error_rubro_obligatorio">Elige el rubro</string>
+    <string name="reco_error_comuna_obligatoria">Elige la comuna</string>
+    <string name="reco_error_rut_invalido">Revisa el RUT de la organización: parece que no es válido</string>
+    <string name="reco_error_autorizacion">Para guardar los datos del contacto, confirma que esa persona te autorizó</string>
+    <string name="reco_error_contacto_sin_nombre">Escribe el nombre de la persona de contacto</string>
+    <string name="reco_error_correo_invalido">El correo no parece válido</string>
+    <string name="reco_error_motivo_obligatorio">Cuéntanos el motivo para poder descartarla</string>
+    <string name="reco_error_enviar">No pudimos enviar tu recomendación. Inténtalo de nuevo.</string>
+
+    <!--Talkback-->
+    <string name="cd_reco_icono">Ícono de recomendación</string>
+    <string name="cd_reco_estado">Estado de la recomendación: %1$s</string>
+    <string name="cd_reco_paso_actual">Etapa %1$d de %2$d: %3$s</string>
+    <string name="cd_reco_switch_autoriza">Confirmar que el contacto autorizó compartir sus datos</string>
+    <string name="cd_reco_campo_obligatorio">%1$s, campo obligatorio</string>
+    <string name="cd_reco_selector_rubro">Selector de rubro</string>
+    <string name="cd_reco_selector_comuna">Selector de comuna</string>
+
+</resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <!--Pantalla principal-->
+    <string name="recon_titulo">Mis reconocimientos</string>
+    <string name="recon_intro">Pagar a tiempo y recomendar suma. Aquí guardamos todo lo que has logrado.</string>
+    <string name="recon_nota_simbolico">Son reconocimientos simbólicos, sin valor en dinero. Una vez obtenidos, son tuyos para siempre.</string>
+    <string name="recon_seccion_obtenidos">Los que ya tienes</string>
+    <string name="recon_seccion_por_obtener">Por obtener</string>
+    <plurals name="recon_cantidad_obtenidos">
+        <item quantity="one">%1$d reconocimiento obtenido</item>
+        <item quantity="other">%1$d reconocimientos obtenidos</item>
+    </plurals>
+    <string name="recon_vacio">Tu primer reconocimiento está más cerca de lo que crees. ¡Sigue pagando a tiempo!</string>
+    <string name="recon_obtenido_el">Obtenido el %1$s</string>
+    <string name="recon_sin_historial">Cuando tengas más pagos en tu historial, verás aquí tu avance.</string>
+
+    <!--Vista recomendaciones-->
+    <string name="recon_tab_reconocimientos">Reconocimientos</string>
+    <string name="recon_tab_recomendaciones">Recomendaciones</string>
+    <string name="recon_logros_titulo">Mis logros</string>
+
+    <!--Detalle-->
+    <string name="recon_detalle_titulo">Detalle del reconocimiento</string>
+    <string name="recon_detalle_como_lo_obtuviste">Cómo lo obtuviste</string>
+    <string name="recon_detalle_como_obtenerlo">Cómo obtenerlo</string>
+    <string name="recon_detalle_fecha">Fecha en que lo obtuviste</string>
+
+    <!--Progreso-->
+    <string name="recon_progreso_meses">Llevas %1$d de %2$d meses al día</string>
+    <string name="recon_progreso_pagos">Llevas %1$d de %2$d pagos a tiempo</string>
+    <string name="recon_progreso_animo">¡Vas muy bien, sigue así!</string>
+    <string name="recon_progreso_empezar">Puedes empezar hoy: tu próximo pago a tiempo cuenta.</string>
+
+    <!--Catalogo reconocimientos-->
+    <string name="recon_nombre_primer_pago">Primer pago a tiempo</string>
+    <string name="recon_desc_primer_pago">Pagaste un compromiso antes o el mismo día de su vencimiento.</string>
+
+    <string name="recon_nombre_puntual">Persona puntual</string>
+    <string name="recon_desc_puntual">Acumulaste 10 pagos a tiempo en tu historial.</string>
+
+    <string name="recon_nombre_3_meses">3 meses al día</string>
+    <string name="recon_desc_3_meses">Pagaste a tiempo todos tus compromisos durante 3 meses seguidos.</string>
+
+    <string name="recon_nombre_6_meses">6 meses al día</string>
+    <string name="recon_desc_6_meses">Pagaste a tiempo todos tus compromisos durante 6 meses seguidos.</string>
+
+    <string name="recon_nombre_12_meses">Un año al día</string>
+    <string name="recon_desc_12_meses">Pagaste a tiempo todos tus compromisos durante 12 meses seguidos.</string>
+
+    <string name="recon_nombre_impulsor">Impulsor de PagoFlex</string>
+    <string name="recon_desc_impulsor">Una organización que recomendaste se unió a PagoFlex.</string>
+
+    <!--Motivo-->
+    <string name="recon_motivo_primer_pago">Pagaste a tiempo tu compromiso con %1$s.</string>
+    <string name="recon_motivo_pagos">Sumaste %1$d pagos a tiempo en tu historial.</string>
+    <plurals name="recon_motivo_meses">
+        <item quantity="one">Pagaste a tiempo todos tus compromisos durante %1$d mes.</item>
+        <item quantity="other">Pagaste a tiempo todos tus compromisos durante %1$d meses seguidos.</item>
+    </plurals>
+    <string name="recon_motivo_recomendacion">%1$s se unió a PagoFlex gracias a tu recomendación.</string>
+
+    <!--Reconocimiento nuevo-->
+    <string name="recon_nuevo_titulo">¡Nuevo reconocimiento!</string>
+    <string name="recon_nuevo_texto">Obtuviste «%1$s». ¡Gracias por tu constancia!</string>
+    <string name="recon_btn_ver">Ver mis reconocimientos</string>
+    <string name="recon_btn_seguir">Seguir</string>
+
+    <!--Notificaciones-->
+    <string name="notif_recon_titulo">¡Lograste algo nuevo!</string>
+    <string name="notif_recon_texto">Obtuviste el reconocimiento «%1$s». Entra a verlo.</string>
+
+    <!--Errores-->
+    <string name="recon_error_cargar">No pudimos cargar tus reconocimientos. Inténtalo de nuevo.</string>
+
+    <!--Talkback-->
+    <string name="cd_recon_icono_obtenido">Reconocimiento obtenido: %1$s</string>
+    <string name="cd_recon_icono_pendiente">Reconocimiento por obtener: %1$s</string>
+    <string name="cd_recon_fecha">Obtenido el %1$s</string>
+    <string name="cd_recon_progreso">Progreso: %1$d de %2$d</string>
+    <string name="cd_recon_celebracion">Animación de celebración por un nuevo reconocimiento</string>
+
+</resources>
