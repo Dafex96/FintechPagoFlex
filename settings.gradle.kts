@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FintechPagoFlex"
+rootProject.name = "PagoFlex"
 include(":app")
