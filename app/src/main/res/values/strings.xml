@@ -40,6 +40,33 @@
     <string name="nav_reportes">Reportes</string>
     <string name="nav_cobranza">Cobranza</string>
 
+    <!--Login-->
+    <string name="login_titulo">Inicia sesión</string>
+    <string name="login_subtitulo">Revisa tus compromisos y paga en un par de toques.</string>
+    <string name="login_campo_rut">RUT</string>
+    <string name="login_rut_ayuda">Con guion y dígito verificador. Ej: 12345678-5</string>
+    <string name="login_campo_contrasena">Contraseña</string>
+    <string name="login_btn_ingresar">Ingresar</string>
+    <string name="login_btn_ingresando">Ingresando…</string>
+
+    <!--Errores-->
+    <string name="login_error_credenciales">RUT o contraseña incorrectos. Inténtalo de nuevo.</string>
+    <string name="login_error_inactivo">Tu usuario no está activo. Contacta a PagoFlex.</string>
+    <string name="login_error_generico">No pudimos iniciar tu sesión. Inténtalo de nuevo.</string>
+
+    <!--Cuentas de demostración-->
+    <string name="login_demo_titulo">Cuentas de demostración</string>
+    <string name="login_demo_ayuda">Toca una cuenta para completar los datos. La contraseña de todas es %1$s.</string>
+    <string name="login_demo_cuenta">%1$s · %2$s</string>
+
+    <!--Accesibilidad-->
+    <string name="cd_mostrar_contrasena">Mostrar contraseña</string>
+    <string name="cd_ocultar_contrasena">Ocultar contraseña</string>
+
+    <!-- Inicio provisorio -->
+    <string name="inicio_rol">Sesión como %1$s</string>
+    <string name="inicio_en_construccion">Pronto verás aquí tus pantallas. Estamos construyendo la app paso a paso.</string>
+
     <!--Perfil-->
     <string name="titulo_perfil">Mi perfil</string>
     <string name="seccion_sobre_mi">Sobre mí</string>
