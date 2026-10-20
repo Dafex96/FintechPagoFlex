@@ -15,7 +15,5 @@ data class LoginUiState (
 
     val errorRut: ErrorLogin? = null,
     val errorContrasena: ErrorLogin? = null,
-    val errorGeneral: ErrorLogin? = null,
-
-    val cargando: Boolean = false
+    val errorGeneral: ErrorLogin? = null
 )
