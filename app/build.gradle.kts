@@ -59,7 +59,4 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("androidx.navigation:navigation-compose:2.10.2")
-
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
 }
