@@ -10,4 +10,8 @@ data class Usuario(
     val rolCodigo: String,
     val activo: Boolean = true,
     val idEmpresa: Long? = null
-)
+) {
+    val primerNombre: String get() = nombres.substringBefore(" ")
+
+    val nombreCompleto: String get() = "$nombres $apellidos"
+}

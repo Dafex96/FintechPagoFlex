@@ -5,7 +5,7 @@ enum class ErrorLogin {
     RUT_INVALIDO,
     CREDENCIALES,
     INACTIVO,
-    GENERICO,
+    GENERICO
 }
 
 data class LoginUiState (
@@ -17,5 +17,5 @@ data class LoginUiState (
     val errorContrasena: ErrorLogin? = null,
     val errorGeneral: ErrorLogin? = null,
 
-    val cargando: Boolean = false,
+    val cargando: Boolean = false
 )
