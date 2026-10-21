@@ -1,6 +1,7 @@
 package cl.duoc.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import cl.duoc.data.DatosIniciales
 import cl.duoc.data.PagoFlexDbHelper
@@ -65,6 +66,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val usuario = try {
             db.validarCredenciales(Rut.normalizar(estado.rut), Seguridad.hash(estado.contrasena))
         } catch (e: Exception) {
+            Log.e("LoginViewModel", "Error al validar credenciales", e)
             _uiState.update { it.copy(errorGeneral = ErrorLogin.GENERICO) }
             return null
         }

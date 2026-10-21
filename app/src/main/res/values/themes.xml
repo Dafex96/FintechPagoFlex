@@ -9,7 +9,7 @@
 
     <style name="Theme.PagoFlex.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/pf_splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/"icono_app"</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.PagoFlex</item>
     </style>
 
