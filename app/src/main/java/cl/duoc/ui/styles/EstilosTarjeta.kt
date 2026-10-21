@@ -26,6 +26,12 @@ object EstilosTarjeta {
     )
 
     @Composable
+    fun coloresError(): CardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    )
+
+    @Composable
     fun elevacion(): CardElevation = CardDefaults.cardElevation(
         defaultElevation = Dimens.elevacionTarjeta
     )
