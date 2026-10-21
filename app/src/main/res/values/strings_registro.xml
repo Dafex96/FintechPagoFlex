@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <string name="login_sin_cuenta">¿Aún no tienes cuenta?</string>
+    <string name="login_btn_crear_cuenta">Crear cuenta</string>
+
+    <!--Crear cuenta-->
+    <string name="cuenta_titulo">Crea tu cuenta</string>
+    <string name="cuenta_intro">Con tu cuenta podrás revisar tus compromisos y pagarlos en un par de toques.</string>
+
+    <!--Secciones-->
+    <string name="cuenta_seccion_datos">Tus datos</string>
+    <string name="cuenta_seccion_acceso">Tu acceso</string>
+
+    <!--Campos-->
+    <string name="cuenta_campo_nombres">Nombres</string>
+    <string name="cuenta_campo_apellidos">Apellidos</string>
+    <string name="cuenta_campo_rut">RUT</string>
+    <string name="cuenta_rut_ayuda">Con guion y dígito verificador. Ej: 12345678-5</string>
+    <string name="cuenta_campo_correo">Correo electrónico</string>
+    <string name="cuenta_campo_telefono">Teléfono (opcional)</string>
+    <string name="cuenta_telefono_ayuda">Ej: +56 9 1234 5678</string>
+    <string name="cuenta_campo_comuna">Comuna</string>
+    <string name="cuenta_campo_contrasena">Contraseña</string>
+    <string name="cuenta_contrasena_ayuda">Mínimo 8 caracteres, con letras y números</string>
+    <string name="cuenta_campo_confirmar">Repetir contraseña</string>
+
+    <!--Terminos-->
+    <string name="cuenta_terminos">Acepto los términos y condiciones y la política de protección de datos personales</string>
+    <string name="cuenta_privacidad_nota">Usamos tus datos solo para gestionar tus pagos con las empresas que te cobran a través de PagoFlex.</string>
+
+    <!--Boton-->
+    <string name="cuenta_btn_crear">Crear cuenta</string>
+
+    <!--Errores-->
+    <string name="cuenta_error_rut_existe">Ya existe una cuenta con este RUT. Prueba iniciando sesión.</string>
+    <string name="cuenta_error_correo_invalido">Revisa tu correo: parece que no es válido</string>
+    <string name="cuenta_error_correo_existe">Ya existe una cuenta con este correo.</string>
+    <string name="cuenta_error_telefono_invalido">Revisa el teléfono: debe tener entre 9 y 11 dígitos</string>
+    <string name="cuenta_error_comuna">Elige tu comuna</string>
+    <string name="cuenta_error_contrasena_debil">Usa al menos 8 caracteres, con letras y números</string>
+    <string name="cuenta_error_contrasenas_distintas">Las contraseñas no coinciden</string>
+    <string name="cuenta_error_terminos">Debes aceptar los términos para crear tu cuenta</string>
+    <string name="cuenta_error_generico">No pudimos crear tu cuenta. Inténtalo de nuevo.</string>
+
+</resources>
