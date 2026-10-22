@@ -35,6 +35,8 @@ fun CampoContrasena(
     onAlternarVisible: () -> Unit,
     modifier: Modifier = Modifier,
     error: String? = null,
+    ayuda: String? = null,
+    accionTeclado: ImeAction = ImeAction.Done,
     onListo: () -> Unit = {}
 ) {
     val mensajeError = error
@@ -68,11 +70,14 @@ fun CampoContrasena(
         },
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         isError = error != null,
-        supportingText = { if (error != null) Text(error) },
+        supportingText = {
+            val texto = error ?: ayuda
+            if (texto != null) Text(texto)
+        },
         singleLine = true,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done
+            imeAction = accionTeclado
         ),
         keyboardActions = KeyboardActions(onDone = { onListo() }),
         shape = EstilosCampos.forma,

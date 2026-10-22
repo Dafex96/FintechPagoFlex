@@ -2,6 +2,7 @@ package cl.duoc.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -14,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,6 +48,7 @@ import cl.duoc.viewmodel.LoginViewModel
 @Composable
 fun LoginScreen(
     onLoginExitoso: (Usuario) -> Unit,
+    onIrARegistro: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -56,7 +59,8 @@ fun LoginScreen(
         onContrasenaCambia = viewModel::onContrasenaCambia,
         onAlternarVisibilidad = viewModel::onAlternarVisibilidad,
         onIngresar = { viewModel.onIngresar()?.let { usuario -> onLoginExitoso(usuario) } },
-        onUsarCuentaDemo = viewModel::onUsarCuentaDemo
+        onUsarCuentaDemo = viewModel::onUsarCuentaDemo,
+        onIrARegistro = onIrARegistro
     )
 }
 
@@ -67,7 +71,8 @@ fun LoginContent(
     onContrasenaCambia: (String) -> Unit,
     onAlternarVisibilidad: () -> Unit,
     onIngresar: () -> Unit,
-    onUsarCuentaDemo: (CuentaDemo) -> Unit
+    onUsarCuentaDemo: (CuentaDemo) -> Unit,
+    onIrARegistro: () -> Unit
 ) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
@@ -144,6 +149,20 @@ fun LoginContent(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.login_sin_cuenta),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextButton(onClick = onIrARegistro) {
+                        Text(text = stringResource(R.string.login_btn_crear_cuenta))
+                    }
+                }
+
                 HorizontalDivider(modifier = Modifier.padding(vertical = Dimens.espacioChico))
 
                 Text(
@@ -197,7 +216,7 @@ private fun LoginVacioPreview() {
         LoginContent(
             uiState = LoginUiState(),
             onRutCambia = {}, onContrasenaCambia = {}, onAlternarVisibilidad = {},
-            onIngresar = {}, onUsarCuentaDemo = {}
+            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}
         )
     }
 }
@@ -214,7 +233,7 @@ private fun LoginConErroresPreview() {
                 errorGeneral = ErrorLogin.CREDENCIALES
             ),
             onRutCambia = {}, onContrasenaCambia = {}, onAlternarVisibilidad = {},
-            onIngresar = {}, onUsarCuentaDemo = {}
+            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}
         )
     }
 }
