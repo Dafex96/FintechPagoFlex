@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.ui.screens.InicioScreen
 import cl.duoc.ui.screens.LoginScreen
+import cl.duoc.ui.screens.RegistroScreen
 import cl.duoc.viewmodel.SesionViewModel
 
 @Composable
@@ -27,12 +28,25 @@ fun AppNavegacion() {
 
         composable(Ruta.Login.ruta) {
             LoginScreen(
+                onIrARegistro = { navController.navigate(Ruta.Registro.ruta) },
                 onLoginExitoso = { usuario ->
                     sesionViewModel.iniciarSesion(usuario)
                     navController.navigate(Ruta.Inicio.ruta) {
                         popUpTo(Ruta.Login.ruta) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable(Ruta.Registro.ruta) {
+            RegistroScreen(
+                onRegistroExitoso = { usuario ->
+                    sesionViewModel.iniciarSesion(usuario)
+                    navController.navigate(Ruta.Inicio.ruta) {
+                        popUpTo(Ruta.Login.ruta) { inclusive = true }
+                    }
+                },
+                onVolver = { navController.popBackStack() }
             )
         }
 
