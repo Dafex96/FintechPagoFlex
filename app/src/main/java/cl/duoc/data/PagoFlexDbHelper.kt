@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import cl.duoc.model.AvisoAnticipacion
+import cl.duoc.model.CambiosPerfil
 import cl.duoc.model.Comuna
 import cl.duoc.model.NuevoUsuario
 import cl.duoc.model.RolCodigo
@@ -24,8 +25,14 @@ class PagoFlexDbHelper(context: Context) :
 
         private const val SQL_SELECT_USUARIO =
             "SELECT U.ID_USUARIO, U.RUT, U.NOMBRES, U.APELLIDOS, U.CORREO, " +
-                    "U.ID_ROL, R.CODIGO AS rol_codigo, U.ACTIVO, U.ID_EMPRESA " +
-                    "FROM USUARIO U INNER JOIN ROL R ON U.ID_ROL = R.ID_ROL"
+                    "U.ID_ROL, R.CODIGO AS rol_codigo, U.ACTIVO, U.ID_EMPRESA, " +
+                    "U.TELEFONO AS telefono, U.ID_COMUNA AS id_comuna, C.NOMBRE AS comuna_nombre, " +
+                    "U.FECHA_INCORPORACION AS fecha_incorporacion, A.NOMBRE AS area_nombre, " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, U.CARGO AS cargo " +
+                    "FROM USUARIO U INNER JOIN ROL R ON U.ID_ROL = R.ID_ROL " +
+                    "LEFT JOIN COMUNA C ON U.ID_COMUNA = C.ID_COMUNA " +
+                    "LEFT JOIN AREA A ON U.ID_AREA = A.ID_AREA " +
+                    "LEFT JOIN EMPRESA_CLIENTE E ON U.ID_EMPRESA = E.ID_EMPRESA"
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -89,6 +96,23 @@ class PagoFlexDbHelper(context: Context) :
         return writableDatabase.insertOrThrow("usuario", null, valores)
     }
 
+    fun existeCorreoDeOtro(correo: String, idUsuario: Long): Boolean =
+        readableDatabase.rawQuery(
+            "SELECT 1 FROM USUARIO WHERE LOWER(CORREO) = LOWER(?) AND ID_USUARIO <> ?",
+            arrayOf(correo, idUsuario.toString())
+        ).use { cursor -> cursor.moveToFirst() }
+
+    fun actualizarPerfil(cambios: CambiosPerfil): Int {
+        val valores = ContentValues().apply {
+            put("nombres", cambios.nombres)
+            put("apellidos", cambios.apellidos)
+            put("correo", cambios.correo.lowercase())
+            if (cambios.telefono != null) put("telefono", cambios.telefono) else putNull("telefono")
+            if (cambios.comunaId != null) put("id_comuna", cambios.comunaId)
+        }
+        return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(cambios.id.toString()))
+    }
+
     private fun consultarUsuarios(sql: String, args: Array<String>?): List<Usuario> {
         val lista = mutableListOf<Usuario>()
         readableDatabase.rawQuery(sql, args).use { cursor ->
@@ -111,8 +135,26 @@ class PagoFlexDbHelper(context: Context) :
         // id_empresa solo existe para ejecutivos: en los demás roles es NULL
         idEmpresa = cursor.getColumnIndexOrThrow("id_empresa").let { columna ->
             if (cursor.isNull(columna)) null else cursor.getLong(columna)
-        }
+        },
+
+        telefono = cursor.textoONulo("telefono"),
+        comunaId = cursor.largoONulo("id_comuna"),
+        comunaNombre = cursor.textoONulo("comuna_nombre"),
+        fechaIncorporacion = cursor.textoONulo("fecha_incorporacion"),
+        areaNombre = cursor.textoONulo("area_nombre"),
+        empresaNombre = cursor.textoONulo("empresa_nombre"),
+        cargo = cursor.textoONulo("cargo")
     )
+
+    private fun Cursor.textoONulo(columna: String): String? {
+        val indice = getColumnIndexOrThrow(columna)
+        return if (isNull(indice)) null else getString(indice)
+    }
+
+    private fun Cursor.largoONulo(columna: String): Long? {
+        val indice = getColumnIndexOrThrow(columna)
+        return if (isNull(indice)) null else getLong(indice)
+    }
 
     private fun existe(sql: String, valor: String): Boolean =
         readableDatabase.rawQuery(sql, arrayOf(valor)).use { cursor -> cursor.moveToFirst() }
