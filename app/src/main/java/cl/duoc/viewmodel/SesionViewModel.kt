@@ -33,6 +33,10 @@ class SesionViewModel(application: Application) : AndroidViewModel(application) 
         _usuarioActual.value = null
     }
 
+    fun actualizarUsuario(usuario: Usuario) {
+        _usuarioActual.value = usuario
+    }
+
     override fun onCleared() {
         db.close()
         super.onCleared()
