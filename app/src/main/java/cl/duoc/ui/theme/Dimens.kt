@@ -34,4 +34,7 @@ object Dimens {
 
     // Contenido
     val anchoMaximoContenido = 600.dp
+
+    //Avatar
+    val tamanoAvatar = 96.dp
 }

@@ -11,14 +11,15 @@ data class Usuario(
     val activo: Boolean = true,
     val idEmpresa: Long? = null,
 
-    //Perfil
     val telefono: String? = null,
     val comunaId: Long? = null,
     val comunaNombre: String? = null,
     val fechaIncorporacion: String? = null,
     val areaNombre: String? = null,
     val empresaNombre: String? = null,
-    val cargo: String? = null
+    val cargo: String? = null,
+
+    val avatar: ByteArray? = null
 ) {
     val primerNombre: String get() = nombres.substringBefore(" ")
 
