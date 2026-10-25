@@ -37,4 +37,5 @@ object Dimens {
 
     //Avatar
     val tamanoAvatar = 96.dp
+    val bordeAvatar = 4.dp
 }

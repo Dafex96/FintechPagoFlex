@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <!--Foto-->
+    <string name="foto_titulo">Foto de perfil</string>
+    <string name="foto_cambiar">Cambiar foto</string>
+    <string name="foto_btn_camara">Cámara</string>
+    <string name="foto_btn_galeria">Galería</string>
+    <string name="foto_btn_quitar">Quitar foto</string>
+    <string name="foto_privacidad">Tu foto se guarda solo en este teléfono.</string>
+
+    <!--Accesibilidad-->
+    <string name="foto_cd_avatar">Foto de perfil de %1$s</string>
+
+    <!--Avisos-->
+    <string name="foto_guardada">Listo, actualizamos tu foto.</string>
+    <string name="foto_quitada">Quitamos tu foto de perfil.</string>
+    <string name="foto_error_leer">No pudimos usar esa imagen. Prueba con otra.</string>
+    <string name="foto_sin_camara">Este teléfono no tiene una app de cámara disponible.</string>
+    <string name="foto_sin_galeria">No encontramos una galería para elegir la foto.</string>
+
+    <!--Permisos rechazados-->
+    <string name="foto_permiso_camara_denegado">Para tomar tu foto necesitamos el permiso de la cámara. Puedes activarlo en Ajustes.</string>
+    <string name="foto_permiso_galeria_denegado">Para elegir una foto necesitamos acceso a tus imágenes. Puedes activarlo en Ajustes.</string>
+    <string name="foto_btn_ajustes">Ajustes</string>
+
+</resources>

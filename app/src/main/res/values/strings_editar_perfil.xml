@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <!--Perfil -->
+    <string name="perfil_etiqueta_desde">Con PagoFlex desde</string>
+    <string name="perfil_sin_dato">Sin registrar</string>
+
+    <!--Editar perfil-->
+    <string name="editar_titulo">Editar perfil</string>
+    <string name="editar_btn_editar">Editar perfil</string>
+    <string name="editar_btn_guardar">Guardar cambios</string>
+    <string name="editar_rut_nota">El RUT no se puede cambiar.</string>
+
+    <!--Avisos-->
+    <string name="editar_guardado">Listo, guardamos tus cambios.</string>
+    <string name="editar_error_guardar">No pudimos guardar tus cambios. Inténtalo de nuevo.</string>
+
+</resources>
