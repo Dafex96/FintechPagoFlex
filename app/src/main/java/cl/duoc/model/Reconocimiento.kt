@@ -6,7 +6,6 @@ data class Reconocimiento(
     val descripcion: String
 )
 
-/** Fila de usuario_reconocimiento: un reconocimiento ya obtenido por la persona. */
 data class UsuarioReconocimiento(
     val idUsuarioFinal: Long,
     val idReconocimiento: Int,
@@ -25,7 +24,6 @@ object ReconocimientoId {
 
 enum class TipoProgreso { NINGUNO, PAGOS, MESES }
 
-/** Lo que la pantalla necesita para mostrar un reconocimiento, obtenido o por obtener. */
 data class ReconocimientoItem(
     val id: Int,
     val nombre: String,

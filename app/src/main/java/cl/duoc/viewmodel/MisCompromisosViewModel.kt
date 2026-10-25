@@ -19,7 +19,7 @@ data class MisCompromisosUiState(
     val compromisoParaReportar: Compromiso? = null,
     val pagoExitoso: Pago? = null,
     val reporteExitoso: Reporte? = null,
-    val medioPagoSeleccionado: Long = 1, // 1: Debito, 2: Credito, 3: Transferencia, 4: Simulado
+    val medioPagoSeleccionado: Long = 1,
     val motivoReporteSeleccionado: Long = 1,
     val comentarioReporte: String = "",
     val cargando: Boolean = false
@@ -59,7 +59,6 @@ class MisCompromisosViewModel(application: Application) : AndroidViewModel(appli
         val comp = _uiState.value.compromisoParaPagar ?: return
         val medio = _uiState.value.medioPagoSeleccionado
         val pago = db.registrarPago(comp.id, medio)
-        // Un pago a tiempo puede desbloquear un reconocimiento; si falla, el pago igual quedó registrado.
         runCatching {
             EvaluadorReconocimientos(getApplication(), db).evaluar(currentUsuarioId, notificar = true)
         }

@@ -127,7 +127,6 @@ fun MisCompromisosContent(
                     .padding(horizontal = Dimens.espacioPantalla, vertical = Dimens.espacioChico),
                 verticalArrangement = Arrangement.spacedBy(Dimens.espacioMedio)
             ) {
-                // Filtros
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -169,7 +168,6 @@ fun MisCompromisosContent(
         }
     }
 
-    // Modal de Pago
     uiState.compromisoParaPagar?.let { comp ->
         AlertDialog(
             onDismissRequest = { onSeleccionarCompromisoParaPagar(null) },
@@ -225,7 +223,6 @@ fun MisCompromisosContent(
         )
     }
 
-    // Modal de Reportar Problema
     uiState.compromisoParaReportar?.let { comp ->
         AlertDialog(
             onDismissRequest = { onSeleccionarCompromisoParaReportar(null) },
@@ -275,7 +272,6 @@ fun MisCompromisosContent(
         )
     }
 
-    // Modal de Éxito Pago
     uiState.pagoExitoso?.let { pago ->
         AlertDialog(
             onDismissRequest = onCerrarModalExito,
@@ -297,7 +293,6 @@ fun MisCompromisosContent(
         )
     }
 
-    // Modal de Éxito Reporte
     uiState.reporteExitoso?.let { reporte ->
         AlertDialog(
             onDismissRequest = onCerrarModalExito,

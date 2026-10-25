@@ -23,7 +23,6 @@ class InicioUsuarioViewModel(application: Application) : AndroidViewModel(applic
         _resumen.value = db.obtenerResumenInicioUsuario(idUsuario)
         _avisosActivos.value = db.obtenerPreferenciasAvisos(idUsuario).activos
 
-        // Revisa vencimientos con las preferencias de la persona (anticipación, horario, un aviso por día).
         AvisosScheduler.verificarAhora(getApplication())
     }
 

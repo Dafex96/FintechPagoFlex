@@ -43,10 +43,9 @@ fun AppNavegacion(
         if (usuarioActual != null) Ruta.Inicio.ruta else Ruta.Login.ruta
     }
 
-    // Si la persona tocó una notificación, la llevamos a la pantalla correspondiente (solo las de su rol).
     LaunchedEffect(destinoNotificacion, usuarioActual?.id) {
         val destino = destinoNotificacion ?: return@LaunchedEffect
-        val usuario = usuarioActual ?: return@LaunchedEffect   // espera a que inicie sesión
+        val usuario = usuarioActual ?: return@LaunchedEffect
         val permitidos = when {
             usuario.esUsuarioFinal -> listOf(
                 Ruta.Compromisos.ruta, Ruta.HistorialPagos.ruta, Ruta.Reconocimientos.ruta

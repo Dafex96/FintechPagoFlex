@@ -158,7 +158,6 @@ fun HistorialPagosContent(
         }
     }
 
-    // Modal de Detalle de Comprobante
     pagoSeleccionado?.let { pago ->
         AlertDialog(
             onDismissRequest = { onSeleccionarPago(null) },

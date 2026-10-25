@@ -247,7 +247,6 @@ fun EmpresaCompromisosContent(
         }
     }
 
-    // Modal de Anulación (RF-19)
     uiState.compromisoParaAnular?.let { comp ->
         AlertDialog(
             onDismissRequest = { onSeleccionarCompromisoParaAnular(null) },

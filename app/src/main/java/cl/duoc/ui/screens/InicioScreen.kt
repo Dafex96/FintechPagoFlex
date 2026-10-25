@@ -60,7 +60,7 @@ fun InicioScreen(
             )
             Spacer(modifier = Modifier.weight(1f))
             BotonPrincipal(
-                texto = stringResource(R.string.titulo_perfil),      // "Mi perfil"
+                texto = stringResource(R.string.titulo_perfil),
                 onClick = onIrAPerfil,
                 modifier = Modifier.fillMaxWidth()
             )

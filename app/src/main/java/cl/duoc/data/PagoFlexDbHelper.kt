@@ -95,8 +95,6 @@ class PagoFlexDbHelper(context: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 3) {
-            // v3: datos de prueba completos del Anexo 9. Son datos ficticios, así que se reconstruye todo
-            // (hijos antes que padres para respetar las claves foráneas).
             EsquemaBd.TABLAS.asReversed().forEach { tabla -> db.execSQL("DROP TABLE IF EXISTS $tabla") }
             onCreate(db)
         }

@@ -35,17 +35,12 @@ class EvaluadorReconocimientos(
 
     private data class PagoEvaluado(val fechaPago: String, val empresa: String, val aTiempo: Boolean, val mes: Int)
 
-    /**
-     * @param notificar avisa con una notificación cada reconocimiento nuevo (útil tras un pago,
-     * innecesario cuando la persona ya está mirando la pantalla de reconocimientos).
-     */
     fun evaluar(idUsuario: Long, notificar: Boolean = false): Resultado {
         val hoy = Fechas.hoyIso()
         val compromisos = db.listarCompromisosUsuario(idUsuario)
         val pagosPorCompromiso = db.listarPagosUsuario(idUsuario).associateBy { it.idCompromiso }
         val catalogo = db.listarCatalogoReconocimientos().associateBy { it.idReconocimiento }
 
-        // Pagos ordenados por fecha, marcados a tiempo (fecha de pago <= fecha de vencimiento, RN-10).
         val pagos = compromisos.mapNotNull { compromiso ->
             val pago = pagosPorCompromiso[compromiso.id] ?: return@mapNotNull null
             PagoEvaluado(
@@ -57,8 +52,6 @@ class EvaluadorReconocimientos(
         }.sortedBy { it.fechaPago }
         val aTiempo = pagos.filter { it.aTiempo }
 
-        // Meses "al día": cerrados (nada vence hoy o después) y con todos sus compromisos pagados a tiempo.
-        // Los anulados y los en revisión no cuentan ni a favor ni en contra, igual que en RN-10.
         val relevantes = compromisos.filter {
             it.idEstadoCompromiso != EstadoCompromisoId.ANULADO.toLong() &&
                     it.idEstadoCompromiso != EstadoCompromisoId.EN_REVISION.toLong()
@@ -80,7 +73,6 @@ class EvaluadorReconocimientos(
                 .max()
         }
 
-        // Racha de meses consecutivos; se guarda en qué fecha se alcanzó cada meta.
         var racha = 0
         var mejorRacha = 0
         var mesAnterior = Int.MIN_VALUE

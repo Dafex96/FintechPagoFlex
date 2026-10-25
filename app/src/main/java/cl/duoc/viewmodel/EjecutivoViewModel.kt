@@ -39,7 +39,6 @@ class EjecutivoViewModel(application: Application) : AndroidViewModel(applicatio
         currentEmpresaId = idEmpresa
         currentEjecutivoId = idEjecutivo
 
-        // Avisa si algún compromiso de su empresa quedó En revisión por un reporte.
         AvisosScheduler.verificarAhora(getApplication())
 
         val resumen = db.obtenerResumenCobranzaEmpresa(idEmpresa)

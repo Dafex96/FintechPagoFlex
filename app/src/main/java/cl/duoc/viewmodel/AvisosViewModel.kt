@@ -50,7 +50,6 @@ class AvisosViewModel(application: Application) : AndroidViewModel(application) 
             _uiState.update {
                 it.copy(activos = activos, diasAnticipacion = dias, mensaje = R.string.avisos_guardado)
             }
-            // Con las preferencias nuevas puede haber un aviso pendiente: se revisa de inmediato.
             if (activos) AvisosScheduler.verificarAhora(getApplication())
         } else {
             _uiState.update { it.copy(mensaje = R.string.avisos_error_guardar) }

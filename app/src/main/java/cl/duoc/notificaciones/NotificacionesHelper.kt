@@ -19,10 +19,6 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.abs
 
-/**
- * Único punto de la app que habla con el sistema de notificaciones de Android.
- * Los textos viven en strings_avisos.xml y mantienen el tono positivo de RN-11.
- */
 object NotificacionesHelper {
 
     const val EXTRA_DESTINO = "cl.duoc.notificaciones.EXTRA_DESTINO"
@@ -32,12 +28,10 @@ object NotificacionesHelper {
     private const val CANAL_TRABAJO = "pagoflex_trabajo"
     private const val CANAL_ANTIGUO = "pagoflex_avisos_vencimiento"
 
-    /** Se puede llamar muchas veces: Android ignora los canales que ya existen. */
     fun crearCanales(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
 
-        // El canal de la versión anterior se creó con importancia media y Android no permite subirla después.
         manager.deleteNotificationChannel(CANAL_ANTIGUO)
 
         manager.createNotificationChannels(
@@ -61,11 +55,8 @@ object NotificacionesHelper {
         )
     }
 
-    /** Falso si falta el permiso (Android 13+) o si la persona silenció la app desde los ajustes. */
     fun puedeNotificar(context: Context): Boolean =
         NotificationManagerCompat.from(context).areNotificationsEnabled()
-
-    // ---- Usuario final -------------------------------------------------------------------------
 
     fun avisoVencimiento(context: Context, compromiso: Compromiso, tipo: PoliticaAvisos.TipoAviso, diasParaVencer: Int) {
         val fecha = Fechas.aFechaCorta(compromiso.fechaVencimiento)
@@ -145,8 +136,6 @@ object NotificacionesHelper {
         )
     }
 
-    // ---- Ejecutivo de empresa cliente ----------------------------------------------------------
-
     fun compromisoEnRevision(context: Context, compromiso: Compromiso) {
         publicar(
             context, CANAL_TRABAJO, "revision:${compromiso.id}",
@@ -156,8 +145,6 @@ object NotificacionesHelper {
             destino = Ruta.EjecutivoCompromisos.ruta
         )
     }
-
-    // ---- Internos ------------------------------------------------------------------------------
 
     private fun publicar(
         context: Context,
@@ -190,7 +177,6 @@ object NotificacionesHelper {
         try {
             NotificationManagerCompat.from(context).notify(id, builder.build())
         } catch (e: SecurityException) {
-            // El permiso se revocó justo ahora: no hay nada más que hacer.
         }
     }
 

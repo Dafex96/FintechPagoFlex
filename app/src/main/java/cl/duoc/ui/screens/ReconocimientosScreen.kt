@@ -167,8 +167,6 @@ fun ReconocimientosContent(
     }
 }
 
-// ---- Resumen ---------------------------------------------------------------------------------
-
 @Composable
 private fun ResumenReconocimientos(estado: ReconocimientosUiState) {
     val obtenidos = estado.obtenidos.size
@@ -220,8 +218,6 @@ private fun EncabezadoSeccion(titulo: String) {
         modifier = Modifier.semantics { heading() }
     )
 }
-
-// ---- Tarjetas --------------------------------------------------------------------------------
 
 @Composable
 private fun TarjetaObtenida(item: ReconocimientoItem, onClick: () -> Unit) {
@@ -386,8 +382,6 @@ private fun TextoError() {
     }
 }
 
-// ---- Diálogos --------------------------------------------------------------------------------
-
 @Composable
 private fun DialogoDetalle(item: ReconocimientoItem, onCerrar: () -> Unit) {
     AlertDialog(
@@ -450,8 +444,6 @@ private fun DialogoCelebracion(nuevos: List<Reconocimiento>, onCerrar: () -> Uni
         }
     )
 }
-
-// ---- Vista previa ----------------------------------------------------------------------------
 
 @Preview(showBackground = true)
 @Composable

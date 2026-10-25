@@ -93,10 +93,6 @@ object DatosIniciales {
         Ejecutivos("12584396-4", "Mónica Patricia", "Leiva Castro", "mleiva@plazaoriente.ejemplo", "+56 9 0000 0407", 8, "Administradora de cobranza"),
     )
 
-    // ---------------------------------------------------------------------------------------------------------------
-    // Anexo 9 · Compromisos de pago (fecha de referencia 06-10-2026). Los CP-2026-0064/0072/0081/0089/0090/0091/0095/0098
-    // no están en la tabla de compromisos del anexo, pero los comprobantes y reportes del anexo los referencian.
-    // ---------------------------------------------------------------------------------------------------------------
     private const val PEND = EstadoCompromisoId.PENDIENTE
     private const val VENC = EstadoCompromisoId.VENCIDO
     private const val PAG = EstadoCompromisoId.PAGADO
@@ -126,7 +122,6 @@ object DatosIniciales {
         CompromisoSemilla("CP-2026-0112", 7, 6, "Cuota social octubre", 10, 12, 15000, "2026-10-05", PAG, 0, "2026-10-04T08:15:00", "2026-09-25T09:00:00", 5),
     )
 
-    // N° comprobante, folio, fecha y hora, monto pagado (incluye recargo), canal, medio de pago (1 débito, 2 crédito, 3 transferencia, 4 simulado)
     private val PAGOS_ANEXO = listOf(
         PagoSemilla("CPR-000377", "CP-2026-0072", "2026-09-02T21:14:00", 318500, 3, 3),
         PagoSemilla("CPR-000398", "CP-2026-0089", "2026-09-09T13:05:00", 520000, 2, 1),
@@ -232,7 +227,6 @@ object DatosIniciales {
         val primerIdAgente = USUARIOS_FINALES.size + 1
         val primerIdEjecutivo = USUARIOS_FINALES.size + AGENTES.size + 1
 
-        // Compromisos (Anexo 9 + historial sintético) y sus pagos / comprobantes
         val idCompromiso = HashMap<String, Long>()
         (COMPROMISOS_ANEXO + DatosHistoricos.COMPROMISOS).forEach { c ->
             idCompromiso[c.folio] = db.insertar(
@@ -253,7 +247,6 @@ object DatosIniciales {
             )
         }
 
-        // Anulaciones (RN-21): CP-0111 por EJ-04 (repactación) y CP-0081 por EJ-02 (cobro duplicado)
         db.insertar(
             "anulacion", "id_compromiso" to idCompromiso.getValue("CP-2026-0111"), "id_ejecutivo" to primerIdEjecutivo + 3,
             "id_motivo_anulacion" to 1, "comentario" to null, "fecha" to "2026-09-22T09:30:00",
@@ -263,8 +256,6 @@ object DatosIniciales {
             "id_motivo_anulacion" to 2, "comentario" to "Cobro duplicado", "fecha" to "2026-09-05T11:00:00",
         )
 
-        // Reportes del Anexo 9. REP-0012 (Luis) no se carga a propósito: dejaría CP-0106 En revisión y se perdería el
-        // caso de orden de pago de HU-03 CA-4 (cuota 14/36 vencida antes que la 15/36). Luis puede crearlo desde la app.
         fun reporte(
             numero: String, folio: String, motivo: Int, comentario: String, creacion: String, estado: Int,
             agente: Int?, toma: String?, respuesta: String?, resolucion: String?,
@@ -287,7 +278,6 @@ object DatosIniciales {
         reporte("REP-0011", "CP-2026-0109", 1, "Pagué por transferencia directa al instituto el 03-10.", "2026-10-03T00:00:00",
             2, 2, "2026-10-05T10:00:00", null, null)
 
-        // Recomendaciones (RF-12) del Anexo 9 con el último cambio de estado que informa el anexo (RNF-15).
         RECOMENDACIONES.forEachIndexed { i, r ->
             db.insertar(
                 "recomendacion",
@@ -303,7 +293,6 @@ object DatosIniciales {
             "correo" to null, "telefono" to "+56 9 0000 0301", "autoriza_contacto" to true)
         db.insertar("contacto_recomendacion", "id_recomendacion" to 6, "nombre" to "Ana Valdés",
             "correo" to "avaldes@cdcordillera.ejemplo", "telefono" to null, "autoriza_contacto" to true)
-        // Último cambio de estado: REC-0001 AG-04 (25-09), REC-0002 AG-05 (10-09), REC-0003 AG-04 (28-09), REC-0005 AG-05 (23-09)
         fun cambioEstado(idRecomendacion: Int, estado: Int, agente: Int, fecha: String, motivo: String? = null) = db.insertar(
             "historial_recomendacion",
             "id_recomendacion" to idRecomendacion, "id_estado_recomendacion" to estado,

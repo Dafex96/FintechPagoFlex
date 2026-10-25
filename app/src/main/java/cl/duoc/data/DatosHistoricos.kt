@@ -1,16 +1,9 @@
 package cl.duoc.data
 
-/*
- * Historial sintético (compromisos pagados + sus comprobantes) de los 7 usuarios finales con historial.
- * Existe para que el indicador de cumplimiento (RN-10) de cada persona calce con la tabla del Anexo 9:
- * Camila 33/36 (91,7%), Luis 8/12, Rosa 28/28, Matías 6/7, Fernanda 19/20, Héctor 12/14, Javiera 5/5.
- * Todos los datos son ficticios. Archivo generado: no editar a mano.
- */
 internal data class CompromisoSemilla(
     val folio: String, val usuarioFinal: Int, val empresa: Int, val concepto: String,
     val cuota: Int?, val totalCuotas: Int?, val monto: Int, val vencimiento: String,
     val estado: Int, val recargo: Int, val cambioEstado: String, val registro: String,
-    /** N° de ejecutivo que lo cargó (1 = EJ-01 ... 7 = EJ-07); null = cargado por PagoFlex desde planilla. */
     val ejecutivo: Int?
 )
 
@@ -23,7 +16,6 @@ internal object DatosHistoricos {
 
     private const val PAGADO = 3
 
-    /** Compromiso ya pagado: [fechaPago] es también su fecha de cambio de estado. */
     private fun c(folio: String, uf: Int, ec: Int, concepto: String, cuota: Int?, total: Int?, monto: Int,
                   venc: String, recargo: Int, fechaPago: String, registro: String, ej: Int?) =
         CompromisoSemilla(folio, uf, ec, concepto, cuota, total, monto, venc, PAGADO, recargo, fechaPago, registro, ej)

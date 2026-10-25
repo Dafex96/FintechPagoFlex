@@ -16,7 +16,6 @@ import cl.duoc.ui.theme.PagoFlexTheme
 
 class MainActivity : ComponentActivity() {
 
-    // Pantalla a la que debe ir la app cuando la persona toca una notificación.
     private var destinoNotificacion by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +33,6 @@ class MainActivity : ComponentActivity() {
                     destinoNotificacion = destinoNotificacion,
                     onDestinoAtendido = {
                         destinoNotificacion = null
-                        // Evita repetir la navegación si la actividad se recrea (por ejemplo, al rotar).
                         intent?.removeExtra(NotificacionesHelper.EXTRA_DESTINO)
                     }
                 )

@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import java.io.ByteArrayOutputStream
 
-
 object ConvertidorImagen {
 
     private const val LADO_MAXIMO = 400

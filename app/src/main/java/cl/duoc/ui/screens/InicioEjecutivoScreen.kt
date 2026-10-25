@@ -117,7 +117,6 @@ fun InicioEjecutivoContent(
                     .padding(Dimens.espacioPantalla),
                 verticalArrangement = Arrangement.spacedBy(Dimens.espacioGrande)
             ) {
-                // Info de Empresa
                 Text(
                     text = "Empresa: ${resumen.empresaNombre.ifEmpty { usuario.empresaNombre ?: "Empresa Cliente" }}",
                     style = MaterialTheme.typography.titleMedium,
@@ -125,7 +124,6 @@ fun InicioEjecutivoContent(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Resumen de Cobranza (RF-20)
                 TarjetaSeccion(titulo = "Resumen de Cobranza") {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(
@@ -159,7 +157,6 @@ fun InicioEjecutivoContent(
                     }
                 }
 
-                // Acciones del Ejecutivo (RF-17, RF-19)
                 Text(
                     text = "Acciones de Cobranza",
                     style = MaterialTheme.typography.titleMedium,

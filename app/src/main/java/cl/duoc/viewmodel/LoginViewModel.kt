@@ -50,7 +50,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun onIngresar(): Usuario? {
         val estado = _uiState.value
 
-        // 1) Validar lo escrito (sin tocar la base de datos)
         val errorRut = when {
             estado.rut.isBlank() -> ErrorLogin.CAMPO_VACIO
             !Rut.esValido(estado.rut) -> ErrorLogin.RUT_INVALIDO

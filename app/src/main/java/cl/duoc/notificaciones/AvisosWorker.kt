@@ -12,14 +12,9 @@ import cl.duoc.model.Usuario
 import cl.duoc.util.Fechas
 import java.util.Calendar
 
-/**
- * Revisa la sesión activa y envía los avisos que correspondan. Corre cada pocas horas
- * (AvisosScheduler) y también al entrar a la app, aunque la app no esté abierta.
- */
 class AvisosWorker(context: Context, parametros: WorkerParameters) : CoroutineWorker(context, parametros) {
 
     private companion object {
-        /** Cuántos días hacia atrás se considera "reciente" una novedad (pago, reporte, compromiso nuevo). */
         const val DIAS_NOVEDAD = 3
     }
 
@@ -57,7 +52,6 @@ class AvisosWorker(context: Context, parametros: WorkerParameters) : CoroutineWo
         val contexto = applicationContext
         val compromisos = db.listarCompromisosUsuario(usuario.id)
 
-        // 1) Vencimientos: lo que más ayuda a la cobranza, va primero.
         for (compromiso in compromisos) {
             val dias = Fechas.diasHasta(compromiso.fechaVencimiento) ?: continue
             val tipo = PoliticaAvisos.tipoDeAviso(compromiso, preferencias.diasAnticipacion, dias) ?: continue
@@ -66,7 +60,6 @@ class AvisosWorker(context: Context, parametros: WorkerParameters) : CoroutineWo
             }
         }
 
-        // 2) Pagos hechos por el portal o el agente conversacional (los de la app ya los ve en pantalla).
         db.listarPagosUsuario(usuario.id)
             .filter { it.idCanal != CanalId.APP.toLong() && esReciente(it.fechaHora) }
             .forEach { pago ->
@@ -75,7 +68,6 @@ class AvisosWorker(context: Context, parametros: WorkerParameters) : CoroutineWo
                 }
             }
 
-        // 3) Reportes que un agente ya resolvió.
         db.listarReportesUsuario(usuario.id)
             .filter { it.idEstadoReporte == EstadoReporteId.RESUELTO.toLong() && esReciente(it.fechaResolucion) }
             .forEach { reporte ->
@@ -84,7 +76,6 @@ class AvisosWorker(context: Context, parametros: WorkerParameters) : CoroutineWo
                 }
             }
 
-        // 4) Compromisos que la empresa cargó hace poco.
         compromisos
             .filter { (it.esPendiente || it.esVencido) && esReciente(it.fechaRegistro) }
             .forEach { compromiso ->

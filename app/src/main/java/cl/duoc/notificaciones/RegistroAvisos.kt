@@ -4,10 +4,6 @@ import android.content.Context
 import androidx.core.content.edit
 import cl.duoc.util.Fechas
 
-/**
- * Recuerda qué avisos ya se enviaron para no repetirlos. Garantiza "como máximo un aviso por
- * compromiso al día" (RN-15) y que cada situación se avise una sola vez.
- */
 class RegistroAvisos(context: Context) {
 
     private val prefs = context.getSharedPreferences("avisos_enviados", Context.MODE_PRIVATE)
