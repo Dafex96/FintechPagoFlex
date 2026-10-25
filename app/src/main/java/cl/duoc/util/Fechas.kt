@@ -11,6 +11,10 @@ object Fechas {
 
     fun hoyIso(): String = SimpleDateFormat(FORMATO_FECHA, Locale.US).format(Date())
 
-    /** "2026-10-21T14:30:00" */
     fun ahoraIso(): String = SimpleDateFormat(FORMATO_FECHA_HORA, Locale.US).format(Date())
+
+    fun aFechaCorta(iso: String): String {
+        val partes = iso.take(10).split("-")
+        return if (partes.size == 3) "${partes[2]}-${partes[1]}-${partes[0]}" else iso
+    }
 }

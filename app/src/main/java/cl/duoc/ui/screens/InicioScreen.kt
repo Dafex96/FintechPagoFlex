@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import cl.duoc.R
 import cl.duoc.model.RolCodigo
 import cl.duoc.model.Usuario
+import cl.duoc.ui.components.BotonPrincipal
 import cl.duoc.ui.components.BotonSecundario
 import cl.duoc.ui.theme.Dimens
 import cl.duoc.ui.theme.PagoFlexTheme
@@ -27,6 +28,7 @@ import cl.duoc.ui.theme.PagoFlexTheme
 @Composable
 fun InicioScreen(
     usuario: Usuario,
+    onIrAPerfil: () -> Unit,
     onCerrarSesion: () -> Unit
 ) {
     Scaffold(
@@ -57,6 +59,11 @@ fun InicioScreen(
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.weight(1f))
+            BotonPrincipal(
+                texto = stringResource(R.string.titulo_perfil),      // "Mi perfil"
+                onClick = onIrAPerfil,
+                modifier = Modifier.fillMaxWidth()
+            )
             BotonSecundario(
                 texto = stringResource(R.string.btn_cerrar_sesion),
                 onClick = onCerrarSesion,
@@ -75,6 +82,7 @@ private fun InicioPreview() {
                 id = 1, rut = "15834207-3", nombres = "Camila Andrea", apellidos = "Rojas Peña",
                 correo = "crojas@correo.ejemplo", rolId = 1, rolCodigo = RolCodigo.USUARIO_FINAL
             ),
+            onIrAPerfil = {},
             onCerrarSesion = {}
         )
     }
