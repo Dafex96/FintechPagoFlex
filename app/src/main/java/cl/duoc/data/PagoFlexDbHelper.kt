@@ -21,14 +21,14 @@ class PagoFlexDbHelper(context: Context) :
     companion object {
         private const val NOMBRE_BD = "pagoflexdb"
 
-        private const val VERSION_BD = 1
+        private const val VERSION_BD = 2
 
         private const val SQL_SELECT_USUARIO =
             "SELECT U.ID_USUARIO, U.RUT, U.NOMBRES, U.APELLIDOS, U.CORREO, " +
                     "U.ID_ROL, R.CODIGO AS rol_codigo, U.ACTIVO, U.ID_EMPRESA, " +
                     "U.TELEFONO AS telefono, U.ID_COMUNA AS id_comuna, C.NOMBRE AS comuna_nombre, " +
                     "U.FECHA_INCORPORACION AS fecha_incorporacion, A.NOMBRE AS area_nombre, " +
-                    "E.NOMBRE_FANTASIA AS empresa_nombre, U.CARGO AS cargo " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, U.CARGO AS cargo, U.AVATAR AS avatar " +
                     "FROM USUARIO U INNER JOIN ROL R ON U.ID_ROL = R.ID_ROL " +
                     "LEFT JOIN COMUNA C ON U.ID_COMUNA = C.ID_COMUNA " +
                     "LEFT JOIN AREA A ON U.ID_AREA = A.ID_AREA " +
@@ -46,8 +46,9 @@ class PagoFlexDbHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        EsquemaBd.TABLAS.reversed().forEach { tabla -> db.execSQL("DROP TABLE IF EXISTS $tabla") }
-        onCreate(db)
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE USUARIO ADD COLUMN AVATAR BLOB")
+        }
     }
 
     fun validarCredenciales(rut: String, contrasenaHash: String): Usuario? =
@@ -113,6 +114,13 @@ class PagoFlexDbHelper(context: Context) :
         return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(cambios.id.toString()))
     }
 
+    fun actualizarAvatar(idUsuario: Long, avatar: ByteArray?): Int {
+        val valores = ContentValues().apply {
+            if (avatar != null) put("avatar", avatar) else putNull("avatar")
+        }
+        return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString()))
+    }
+
     private fun consultarUsuarios(sql: String, args: Array<String>?): List<Usuario> {
         val lista = mutableListOf<Usuario>()
         readableDatabase.rawQuery(sql, args).use { cursor ->
@@ -132,18 +140,19 @@ class PagoFlexDbHelper(context: Context) :
         rolId = cursor.getLong(cursor.getColumnIndexOrThrow("id_rol")),
         rolCodigo = cursor.getString(cursor.getColumnIndexOrThrow("rol_codigo")),
         activo = cursor.getInt(cursor.getColumnIndexOrThrow("activo")) == 1,
-        // id_empresa solo existe para ejecutivos: en los demás roles es NULL
         idEmpresa = cursor.getColumnIndexOrThrow("id_empresa").let { columna ->
             if (cursor.isNull(columna)) null else cursor.getLong(columna)
         },
-
         telefono = cursor.textoONulo("telefono"),
         comunaId = cursor.largoONulo("id_comuna"),
         comunaNombre = cursor.textoONulo("comuna_nombre"),
         fechaIncorporacion = cursor.textoONulo("fecha_incorporacion"),
         areaNombre = cursor.textoONulo("area_nombre"),
         empresaNombre = cursor.textoONulo("empresa_nombre"),
-        cargo = cursor.textoONulo("cargo")
+        cargo = cursor.textoONulo("cargo"),
+        avatar = cursor.getColumnIndexOrThrow("avatar").let { columna ->
+            if (cursor.isNull(columna)) null else cursor.getBlob(columna)
+        }
     )
 
     private fun Cursor.textoONulo(columna: String): String? {

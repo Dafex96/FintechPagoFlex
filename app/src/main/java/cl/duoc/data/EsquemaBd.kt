@@ -109,7 +109,8 @@ object EsquemaBd {
     dias_anticipacion INTEGER CHECK (dias_anticipacion IS NULL OR dias_anticipacion IN (1, 3, 5)),
     id_area INTEGER REFERENCES area(id_area),
     id_empresa INTEGER REFERENCES empresa_cliente(id_empresa),
-    cargo TEXT
+    cargo TEXT,
+    avatar BLOB
 )""",
         """CREATE TABLE compromiso (
     id_compromiso INTEGER PRIMARY KEY AUTOINCREMENT,
