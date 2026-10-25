@@ -10,14 +10,17 @@ import cl.duoc.model.CambiosPerfil
 import cl.duoc.model.Compromiso
 import cl.duoc.model.Comuna
 import cl.duoc.model.EstadoCompromisoId
+import cl.duoc.model.NuevoCompromisoEmpresa
 import cl.duoc.model.NuevoUsuario
 import cl.duoc.model.Pago
 import cl.duoc.model.Reporte
+import cl.duoc.model.ResumenCobranza
 import cl.duoc.model.ResumenInicioUsuario
 import cl.duoc.model.RolCodigo
 import cl.duoc.model.Usuario
 import cl.duoc.util.Fechas
 import cl.duoc.util.Rut
+import cl.duoc.util.Seguridad
 import java.text.Collator
 import java.util.Locale
 
@@ -297,6 +300,150 @@ class PagoFlexDbHelper(context: Context) :
             put("dias_anticipacion", diasAnticipacion)
         }
         return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
+    }
+
+    fun listarCompromisosEmpresa(idEmpresa: Long, filtroEstado: Long? = null): List<Compromiso> {
+        val sql = StringBuilder("$SQL_SELECT_COMPROMISO WHERE C.ID_EMPRESA = ?")
+        val args = mutableListOf(idEmpresa.toString())
+        if (filtroEstado != null) {
+            sql.append(" AND C.ID_ESTADO_COMPROMISO = ?")
+            args.add(filtroEstado.toString())
+        }
+        sql.append(" ORDER BY C.FECHA_VENCIMIENTO ASC")
+        return consultarCompromisos(sql.toString(), args.toTypedArray())
+    }
+
+    fun obtenerResumenCobranzaEmpresa(idEmpresa: Long): ResumenCobranza {
+        val compromisos = listarCompromisosEmpresa(idEmpresa)
+        var recaudado = 0
+        var pendiente = 0
+        var vencido = 0
+        var pagadosCount = 0
+        var pendientesCount = 0
+        var vencidosCount = 0
+        var anuladosCount = 0
+
+        val empresaNombre = compromisos.firstOrNull()?.empresaNombre ?: "Empresa"
+
+        compromisos.forEach { comp ->
+            when {
+                comp.esPagado -> {
+                    recaudado += comp.montoTotal
+                    pagadosCount++
+                }
+                comp.esPendiente -> {
+                    pendiente += comp.montoTotal
+                    pendientesCount++
+                }
+                comp.esVencido -> {
+                    vencido += comp.montoTotal
+                    vencidosCount++
+                }
+                comp.esAnulado -> {
+                    anuladosCount++
+                }
+            }
+        }
+
+        return ResumenCobranza(
+            empresaNombre = empresaNombre,
+            montoRecaudado = recaudado,
+            montoPendiente = pendiente,
+            montoVencido = vencido,
+            totalCompromisos = compromisos.size,
+            pagadosCount = pagadosCount,
+            pendientesCount = pendientesCount,
+            vencidosCount = vencidosCount,
+            anuladosCount = anuladosCount
+        )
+    }
+
+    fun registrarCompromisoEmpresa(idEmpresa: Long, idEjecutivo: Long, datos: NuevoCompromisoEmpresa): String {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            val rutNormalizado = Rut.normalizar(datos.rutPersona)
+            var idUsuarioFinal = readableDatabase.rawQuery(
+                "SELECT ID_USUARIO FROM USUARIO WHERE RUT = ?",
+                arrayOf(rutNormalizado)
+            ).use { cursor -> if (cursor.moveToFirst()) cursor.getLong(0) else -1L }
+
+            if (idUsuarioFinal == -1L) {
+                val valoresUsuario = ContentValues().apply {
+                    put("id_rol", idDeRol(RolCodigo.USUARIO_FINAL))
+                    put("rut", rutNormalizado)
+                    put("nombres", datos.nombresPersona.trim())
+                    put("apellidos", datos.apellidosPersona.trim())
+                    put("correo", datos.correoPersona.trim().lowercase())
+                    put("contrasena_hash", Seguridad.hash("PagoFlex2026"))
+                    if (datos.telefonoPersona.isNotBlank()) put("telefono", datos.telefonoPersona.trim())
+                    put("activo", 1)
+                    put("fecha_creacion", Fechas.ahoraIso())
+                    put("fecha_incorporacion", Fechas.hoyIso())
+                    put("avisos_activos", 1)
+                    put("dias_anticipacion", 3)
+                }
+                idUsuarioFinal = db.insertOrThrow("usuario", null, valoresUsuario)
+            }
+
+            val folio = "F-${(1000..9999).random()}"
+            val ahoraIso = Fechas.ahoraIso()
+
+            val valoresCompromiso = ContentValues().apply {
+                put("folio", folio)
+                put("id_usuario_final", idUsuarioFinal)
+                put("id_empresa", idEmpresa)
+                put("concepto", datos.concepto.trim())
+                if (datos.numeroCuota.isNotBlank()) put("numero_cuota", datos.numeroCuota.toInt())
+                if (datos.totalCuotas.isNotBlank()) put("total_cuotas", datos.totalCuotas.toInt())
+                put("monto", datos.monto.toInt())
+                put("fecha_vencimiento", datos.fechaVencimiento)
+                put("id_estado_compromiso", EstadoCompromisoId.PENDIENTE)
+                put("recargo_aplicado", 0)
+                put("fecha_cambio_estado", ahoraIso)
+                put("id_ejecutivo_registro", idEjecutivo)
+                put("fecha_registro", ahoraIso)
+            }
+            db.insertOrThrow("compromiso", null, valoresCompromiso)
+
+            db.setTransactionSuccessful()
+            return folio
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun anularCompromisoEmpresa(idCompromiso: Long, idEjecutivo: Long, idMotivo: Long, comentario: String?): Boolean {
+        val compromiso = buscarCompromisoPorId(idCompromiso) ?: return false
+        if (compromiso.esPagado) {
+            return false
+        }
+
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            val ahoraIso = Fechas.ahoraIso()
+
+            val valoresAnulacion = ContentValues().apply {
+                put("id_compromiso", idCompromiso)
+                put("id_ejecutivo", idEjecutivo)
+                put("id_motivo_anulacion", idMotivo)
+                if (!comentario.isNullOrBlank()) put("comentario", comentario) else putNull("comentario")
+                put("fecha", ahoraIso)
+            }
+            db.insertOrThrow("anulacion", null, valoresAnulacion)
+
+            val valoresCompromiso = ContentValues().apply {
+                put("id_estado_compromiso", EstadoCompromisoId.ANULADO)
+                put("fecha_cambio_estado", ahoraIso)
+            }
+            db.update("compromiso", valoresCompromiso, "id_compromiso = ?", arrayOf(idCompromiso.toString()))
+
+            db.setTransactionSuccessful()
+            return true
+        } finally {
+            db.endTransaction()
+        }
     }
 
     private fun consultarCompromisos(sql: String, args: Array<String>?): List<Compromiso> {

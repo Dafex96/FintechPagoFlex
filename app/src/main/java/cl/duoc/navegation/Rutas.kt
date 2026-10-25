@@ -7,6 +7,8 @@ sealed class Ruta(val ruta: String) {
     data object Inicio : Ruta("inicio")
     data object Compromisos : Ruta("compromisos")
     data object HistorialPagos : Ruta("historial_pagos")
+    data object EjecutivoCompromisos : Ruta("ejecutivo_compromisos")
+    data object RegistrarCompromiso : Ruta("registrar_compromiso")
     data object Perfil : Ruta("perfil")
     data object EditarPerfil : Ruta("editar_perfil")
 }
