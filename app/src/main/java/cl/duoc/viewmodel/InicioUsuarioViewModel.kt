@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import cl.duoc.data.PagoFlexDbHelper
 import cl.duoc.model.ResumenInicioUsuario
-import cl.duoc.notificaciones.NotificacionesHelper
+import cl.duoc.notificaciones.AvisosScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,23 +16,15 @@ class InicioUsuarioViewModel(application: Application) : AndroidViewModel(applic
     private val _resumen = MutableStateFlow(ResumenInicioUsuario())
     val resumen: StateFlow<ResumenInicioUsuario> = _resumen.asStateFlow()
 
+    private val _avisosActivos = MutableStateFlow(true)
+    val avisosActivos: StateFlow<Boolean> = _avisosActivos.asStateFlow()
+
     fun cargarDatos(idUsuario: Long) {
-        val resumenCargado = db.obtenerResumenInicioUsuario(idUsuario)
-        _resumen.value = resumenCargado
+        _resumen.value = db.obtenerResumenInicioUsuario(idUsuario)
+        _avisosActivos.value = db.obtenerPreferenciasAvisos(idUsuario).activos
 
-        // Verificar e intentar notificar vencimientos locales
-        val usuario = db.buscarUsuarioPorId(idUsuario)
-        if (usuario != null && resumenCargado.compromisosPendientes.isNotEmpty()) {
-            NotificacionesHelper.notificarProximosVencimientos(
-                getApplication(),
-                resumenCargado.compromisosPendientes + resumenCargado.compromisosVencidos,
-                3
-            )
-        }
-    }
-
-    fun probarNotificacionLocal() {
-        NotificacionesHelper.enviarNotificacionPrueba(getApplication())
+        // Revisa vencimientos con las preferencias de la persona (anticipación, horario, un aviso por día).
+        AvisosScheduler.verificarAhora(getApplication())
     }
 
     override fun onCleared() {

@@ -180,15 +180,6 @@ fun InicioEjecutivoContent(
                 )
 
                 BotonSecundario(
-                    texto = stringResource(R.string.titulo_perfil),
-                    onClick = onIrAPerfil,
-                    icono = R.drawable.ic_persona,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(Dimens.espacioGrande))
-
-                BotonSecundario(
                     texto = stringResource(R.string.btn_cerrar_sesion),
                     onClick = onCerrarSesion,
                     modifier = Modifier.fillMaxWidth()

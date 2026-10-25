@@ -1,6 +1,5 @@
 package cl.duoc.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,8 +37,8 @@ import cl.duoc.model.ResumenInicioUsuario
 import cl.duoc.model.Usuario
 import cl.duoc.ui.components.BotonPrincipal
 import cl.duoc.ui.components.BotonSecundario
+import cl.duoc.ui.components.SolicitudPermisoNotificaciones
 import cl.duoc.ui.components.TarjetaSeccion
-import cl.duoc.ui.styles.EstilosTarjeta
 import cl.duoc.ui.theme.Dimens
 import cl.duoc.ui.theme.PagoFlexTheme
 import cl.duoc.viewmodel.InicioUsuarioViewModel
@@ -54,11 +51,13 @@ fun InicioUsuarioScreen(
     onIrACompromisos: () -> Unit,
     onIrAHistorial: () -> Unit,
     onIrAPerfil: () -> Unit,
+    onIrAReconocimientos: () -> Unit,
+    onIrAAvisos: () -> Unit,
     onCerrarSesion: () -> Unit,
     viewModel: InicioUsuarioViewModel = viewModel()
 ) {
-    val context = LocalContext.current
     val resumen by viewModel.resumen.collectAsStateWithLifecycle()
+    val avisosActivos by viewModel.avisosActivos.collectAsStateWithLifecycle()
 
     LaunchedEffect(usuario.id) {
         viewModel.cargarDatos(usuario.id)
@@ -67,14 +66,13 @@ fun InicioUsuarioScreen(
     InicioUsuarioContent(
         usuario = usuario,
         resumen = resumen,
+        avisosActivos = avisosActivos,
         onIrACompromisos = onIrACompromisos,
         onIrAHistorial = onIrAHistorial,
         onIrAPerfil = onIrAPerfil,
-        onCerrarSesion = onCerrarSesion,
-        onProbarNotificacion = {
-            viewModel.probarNotificacionLocal()
-            Toast.makeText(context, "Notificación enviada", Toast.LENGTH_SHORT).show()
-        }
+        onIrAReconocimientos = onIrAReconocimientos,
+        onIrAAvisos = onIrAAvisos,
+        onCerrarSesion = onCerrarSesion
     )
 }
 
@@ -83,11 +81,13 @@ fun InicioUsuarioScreen(
 fun InicioUsuarioContent(
     usuario: Usuario,
     resumen: ResumenInicioUsuario,
+    avisosActivos: Boolean,
     onIrACompromisos: () -> Unit,
     onIrAHistorial: () -> Unit,
     onIrAPerfil: () -> Unit,
-    onCerrarSesion: () -> Unit,
-    onProbarNotificacion: () -> Unit
+    onIrAReconocimientos: () -> Unit,
+    onIrAAvisos: () -> Unit,
+    onCerrarSesion: () -> Unit
 ) {
     val formatoMoneda = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-CL"))
 
@@ -126,7 +126,6 @@ fun InicioUsuarioContent(
                     .padding(Dimens.espacioPantalla),
                 verticalArrangement = Arrangement.spacedBy(Dimens.espacioGrande)
             ) {
-                // Tarjeta Resumen Financiero
                 TarjetaSeccion(titulo = stringResource(R.string.inicio_total_mes)) {
                     Text(
                         text = formatoMoneda.format(resumen.totalMes),
@@ -151,7 +150,6 @@ fun InicioUsuarioContent(
                     }
                 }
 
-                // Próximo Vencimiento
                 resumen.proximoCompromiso?.let { proximo ->
                     TarjetaSeccion(titulo = stringResource(R.string.inicio_proximo_vencimiento)) {
                         Column(verticalArrangement = Arrangement.spacedBy(Dimens.espacioChico)) {
@@ -185,7 +183,10 @@ fun InicioUsuarioContent(
                     }
                 }
 
-                // Acciones Rápidas
+                if (avisosActivos) {
+                    SolicitudPermisoNotificaciones()
+                }
+
                 Text(
                     text = "Menú Principal",
                     style = MaterialTheme.typography.titleMedium,
@@ -206,41 +207,17 @@ fun InicioUsuarioContent(
                 )
 
                 BotonSecundario(
-                    texto = stringResource(R.string.titulo_perfil),
-                    onClick = onIrAPerfil,
-                    icono = R.drawable.ic_persona,
+                    texto = "Mis Reconocimientos",
+                    onClick = onIrAReconocimientos,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Notificación Nativa Test
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = EstilosTarjeta.forma,
-                    colors = EstilosTarjeta.colores()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(Dimens.espacioMedio),
-                        verticalArrangement = Arrangement.spacedBy(Dimens.espacioChico)
-                    ) {
-                        Text(
-                            text = "📲 API Nativa: Notificaciones Locales (RF-11)",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Prueba el envío de avisos de vencimiento directamente a la barra de estado de tu dispositivo.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        BotonSecundario(
-                            texto = "Enviar notificación de prueba",
-                            onClick = onProbarNotificacion,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(Dimens.espacioGrande))
+                BotonSecundario(
+                    texto = stringResource(R.string.avisos_titulo),
+                    onClick = onIrAAvisos,
+                    icono = R.drawable.ic_calendario,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 BotonSecundario(
                     texto = stringResource(R.string.btn_cerrar_sesion),
@@ -265,11 +242,13 @@ private fun InicioUsuarioPreview() {
                 totalMes = 205000,
                 cantidadVencidos = 1
             ),
+            avisosActivos = true,
             onIrACompromisos = {},
             onIrAHistorial = {},
             onIrAPerfil = {},
-            onCerrarSesion = {},
-            onProbarNotificacion = {}
+            onIrAReconocimientos = {},
+            onIrAAvisos = {},
+            onCerrarSesion = {}
         )
     }
 }

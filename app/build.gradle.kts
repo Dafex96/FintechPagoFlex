@@ -59,4 +59,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("androidx.navigation:navigation-compose:2.10.2")
+
+    // Revisión periódica de vencimientos para las notificaciones locales
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 }

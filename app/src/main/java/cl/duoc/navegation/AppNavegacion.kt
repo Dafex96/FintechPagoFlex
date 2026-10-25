@@ -2,6 +2,7 @@ package cl.duoc.navigation
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.R
+import cl.duoc.ui.screens.AvisosScreen
 import cl.duoc.ui.screens.EditarPerfilScreen
 import cl.duoc.ui.screens.EmpresaCompromisosScreen
 import cl.duoc.ui.screens.HistorialPagosScreen
@@ -20,13 +22,17 @@ import cl.duoc.ui.screens.InicioUsuarioScreen
 import cl.duoc.ui.screens.LoginScreen
 import cl.duoc.ui.screens.MisCompromisosScreen
 import cl.duoc.ui.screens.PerfilScreen
+import cl.duoc.ui.screens.ReconocimientosScreen
 import cl.duoc.ui.screens.RecuperarContrasenaScreen
 import cl.duoc.ui.screens.RegistroScreen
 import cl.duoc.ui.screens.RegistrarCompromisoScreen
 import cl.duoc.viewmodel.SesionViewModel
 
 @Composable
-fun AppNavegacion() {
+fun AppNavegacion(
+    destinoNotificacion: String? = null,
+    onDestinoAtendido: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
 
@@ -35,6 +41,23 @@ fun AppNavegacion() {
 
     val destinoInicial = remember {
         if (usuarioActual != null) Ruta.Inicio.ruta else Ruta.Login.ruta
+    }
+
+    // Si la persona tocó una notificación, la llevamos a la pantalla correspondiente (solo las de su rol).
+    LaunchedEffect(destinoNotificacion, usuarioActual?.id) {
+        val destino = destinoNotificacion ?: return@LaunchedEffect
+        val usuario = usuarioActual ?: return@LaunchedEffect   // espera a que inicie sesión
+        val permitidos = when {
+            usuario.esUsuarioFinal -> listOf(
+                Ruta.Compromisos.ruta, Ruta.HistorialPagos.ruta, Ruta.Reconocimientos.ruta
+            )
+            usuario.esEjecutivo -> listOf(Ruta.EjecutivoCompromisos.ruta)
+            else -> emptyList()
+        }
+        if (destino in permitidos) {
+            navController.navigate(destino) { launchSingleTop = true }
+        }
+        onDestinoAtendido()
     }
 
     NavHost(navController = navController, startDestination = destinoInicial) {
@@ -81,6 +104,8 @@ fun AppNavegacion() {
                             onIrACompromisos = { navController.navigate(Ruta.Compromisos.ruta) },
                             onIrAHistorial = { navController.navigate(Ruta.HistorialPagos.ruta) },
                             onIrAPerfil = { navController.navigate(Ruta.Perfil.ruta) },
+                            onIrAReconocimientos = { navController.navigate(Ruta.Reconocimientos.ruta) },
+                            onIrAAvisos = { navController.navigate(Ruta.Avisos.ruta) },
                             onCerrarSesion = {
                                 sesionViewModel.cerrarSesion()
                                 navController.navigate(Ruta.Login.ruta) {
@@ -183,6 +208,24 @@ fun AppNavegacion() {
                 },
                 onVolver = { navController.popBackStack() }
             )
+        }
+
+        composable(Ruta.Reconocimientos.ruta) {
+            usuarioActual?.let { usuario ->
+                ReconocimientosScreen(
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() }
+                )
+            }
+        }
+
+        composable(Ruta.Avisos.ruta) {
+            usuarioActual?.let { usuario ->
+                AvisosScreen(
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

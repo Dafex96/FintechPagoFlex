@@ -2,6 +2,7 @@ package cl.duoc.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import cl.duoc.data.EvaluadorReconocimientos
 import cl.duoc.data.PagoFlexDbHelper
 import cl.duoc.model.Compromiso
 import cl.duoc.model.Pago
@@ -58,6 +59,10 @@ class MisCompromisosViewModel(application: Application) : AndroidViewModel(appli
         val comp = _uiState.value.compromisoParaPagar ?: return
         val medio = _uiState.value.medioPagoSeleccionado
         val pago = db.registrarPago(comp.id, medio)
+        // Un pago a tiempo puede desbloquear un reconocimiento; si falla, el pago igual quedó registrado.
+        runCatching {
+            EvaluadorReconocimientos(getApplication(), db).evaluar(currentUsuarioId, notificar = true)
+        }
         _uiState.update {
             it.copy(
                 compromisoParaPagar = null,

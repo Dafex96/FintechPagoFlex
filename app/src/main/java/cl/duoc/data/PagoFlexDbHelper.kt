@@ -12,6 +12,10 @@ import cl.duoc.model.Comuna
 import cl.duoc.model.EstadoCompromisoId
 import cl.duoc.model.NuevoCompromisoEmpresa
 import cl.duoc.model.NuevoUsuario
+import cl.duoc.model.PreferenciasAvisos
+import cl.duoc.model.Reconocimiento
+import cl.duoc.model.UsuarioReconocimiento
+import cl.duoc.model.EstadoRecomendacionId
 import cl.duoc.model.Pago
 import cl.duoc.model.Reporte
 import cl.duoc.model.ResumenCobranza
@@ -30,7 +34,7 @@ class PagoFlexDbHelper(context: Context) :
     companion object {
         private const val NOMBRE_BD = "pagoflexdb"
 
-        private const val VERSION_BD = 2
+        private const val VERSION_BD = 3
 
         private const val SQL_SELECT_USUARIO =
             "SELECT U.ID_USUARIO, U.RUT, U.NOMBRES, U.APELLIDOS, U.CORREO, " +
@@ -90,8 +94,11 @@ class PagoFlexDbHelper(context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE USUARIO ADD COLUMN AVATAR BLOB")
+        if (oldVersion < 3) {
+            // v3: datos de prueba completos del Anexo 9. Son datos ficticios, así que se reconstruye todo
+            // (hijos antes que padres para respetar las claves foráneas).
+            EsquemaBd.TABLAS.asReversed().forEach { tabla -> db.execSQL("DROP TABLE IF EXISTS $tabla") }
+            onCreate(db)
         }
     }
 
@@ -217,7 +224,7 @@ class PagoFlexDbHelper(context: Context) :
         val db = writableDatabase
         db.beginTransaction()
         try {
-            val numComprobante = "CMP-${(10000..99999).random()}"
+            val numComprobante = siguienteNumero(db, "pago", "numero_comprobante", "CPR-", 6)
             val ahoraIso = Fechas.ahoraIso()
 
             val valoresPago = ContentValues().apply {
@@ -259,7 +266,7 @@ class PagoFlexDbHelper(context: Context) :
         val db = writableDatabase
         db.beginTransaction()
         try {
-            val numReporte = "REP-${(1000..9999).random()}"
+            val numReporte = siguienteNumero(db, "reporte", "numero", "REP-", 4)
             val ahoraIso = Fechas.ahoraIso()
 
             val valoresReporte = ContentValues().apply {
@@ -386,7 +393,7 @@ class PagoFlexDbHelper(context: Context) :
                 idUsuarioFinal = db.insertOrThrow("usuario", null, valoresUsuario)
             }
 
-            val folio = "F-${(1000..9999).random()}"
+            val folio = siguienteNumero(db, "compromiso", "folio", "CP-2026-", 4)
             val ahoraIso = Fechas.ahoraIso()
 
             val valoresCompromiso = ContentValues().apply {
@@ -444,6 +451,84 @@ class PagoFlexDbHelper(context: Context) :
         } finally {
             db.endTransaction()
         }
+    }
+
+    fun obtenerPreferenciasAvisos(idUsuario: Long): PreferenciasAvisos =
+        readableDatabase.rawQuery(
+            "SELECT AVISOS_ACTIVOS, DIAS_ANTICIPACION FROM USUARIO WHERE ID_USUARIO = ?",
+            arrayOf(idUsuario.toString())
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                PreferenciasAvisos(
+                    activos = !cursor.isNull(0) && cursor.getInt(0) == 1,
+                    diasAnticipacion = if (cursor.isNull(1)) AvisoAnticipacion.POR_DEFECTO else cursor.getInt(1)
+                )
+            } else {
+                PreferenciasAvisos(activos = false)
+            }
+        }
+
+    fun listarCatalogoReconocimientos(): List<Reconocimiento> {
+        val lista = mutableListOf<Reconocimiento>()
+        readableDatabase.rawQuery(
+            "SELECT ID_RECONOCIMIENTO, NOMBRE, DESCRIPCION FROM RECONOCIMIENTO ORDER BY ID_RECONOCIMIENTO",
+            null
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(Reconocimiento(cursor.getInt(0), cursor.getString(1), cursor.getString(2)))
+            }
+        }
+        return lista
+    }
+
+    fun listarReconocimientosUsuario(idUsuario: Long): List<UsuarioReconocimiento> {
+        val lista = mutableListOf<UsuarioReconocimiento>()
+        readableDatabase.rawQuery(
+            "SELECT ID_USUARIO_FINAL, ID_RECONOCIMIENTO, FECHA_OBTENCION, MOTIVO " +
+                    "FROM USUARIO_RECONOCIMIENTO WHERE ID_USUARIO_FINAL = ? ORDER BY FECHA_OBTENCION DESC",
+            arrayOf(idUsuario.toString())
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(
+                    UsuarioReconocimiento(
+                        idUsuarioFinal = cursor.getLong(0),
+                        idReconocimiento = cursor.getInt(1),
+                        fechaObtencion = cursor.getString(2),
+                        motivo = cursor.getString(3)
+                    )
+                )
+            }
+        }
+        return lista
+    }
+
+    /** Guarda un reconocimiento. Devuelve false si la persona ya lo tenía (nunca se pisa ni se pierde, RN-16). */
+    fun otorgarReconocimiento(idUsuario: Long, idReconocimiento: Int, fechaIso: String, motivo: String): Boolean {
+        val valores = ContentValues().apply {
+            put("id_usuario_final", idUsuario)
+            put("id_reconocimiento", idReconocimiento)
+            put("fecha_obtencion", fechaIso)
+            put("motivo", motivo)
+        }
+        return writableDatabase.insertWithOnConflict(
+            "usuario_reconocimiento", null, valores, SQLiteDatabase.CONFLICT_IGNORE
+        ) != -1L
+    }
+
+    /** Organizaciones recomendadas por la persona que ya se unieron: pares (nombre, fecha ISO del cambio de estado). */
+    fun listarRecomendacionesQueSeUnieron(idUsuario: Long): List<Pair<String, String>> {
+        val lista = mutableListOf<Pair<String, String>>()
+        readableDatabase.rawQuery(
+            "SELECT R.NOMBRE_ORGANIZACION, H.FECHA FROM RECOMENDACION R " +
+                    "INNER JOIN HISTORIAL_RECOMENDACION H ON H.ID_RECOMENDACION = R.ID_RECOMENDACION " +
+                    "WHERE R.ID_USUARIO_FINAL = ? AND H.ID_ESTADO_RECOMENDACION = ? ORDER BY H.FECHA ASC",
+            arrayOf(idUsuario.toString(), EstadoRecomendacionId.SE_UNIO.toString())
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(cursor.getString(0) to cursor.getString(1))
+            }
+        }
+        return lista
     }
 
     private fun consultarCompromisos(sql: String, args: Array<String>?): List<Compromiso> {
@@ -573,6 +658,15 @@ class PagoFlexDbHelper(context: Context) :
     private fun Cursor.largoONulo(columna: String): Long? {
         val indice = getColumnIndexOrThrow(columna)
         return if (isNull(indice)) null else getLong(indice)
+    }
+
+    /** Siguiente número correlativo con prefijo (ej. CPR-000454), calculado dentro de la transacción en curso. */
+    private fun siguienteNumero(db: SQLiteDatabase, tabla: String, columna: String, prefijo: String, ancho: Int): String {
+        val maximo = db.rawQuery(
+            "SELECT MAX(CAST(SUBSTR($columna, ${prefijo.length + 1}) AS INTEGER)) FROM $tabla WHERE $columna LIKE ?",
+            arrayOf("$prefijo%")
+        ).use { cursor -> if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getInt(0) else 0 }
+        return prefijo + (maximo + 1).toString().padStart(ancho, '0')
     }
 
     private fun existe(sql: String, valor: String): Boolean =

@@ -71,6 +71,12 @@
     <string name="notif_recon_titulo">¡Lograste algo nuevo!</string>
     <string name="notif_recon_texto">Obtuviste el reconocimiento «%1$s». Entra a verlo.</string>
 
+    <!--Pantalla rediseñada-->
+    <string name="recon_resumen_cantidad">%1$d de %2$d</string>
+    <string name="recon_btn_cerrar">Cerrar</string>
+    <string name="recon_estado_bloqueado">Aún por obtener</string>
+    <string name="recon_cargando">Cargando tus reconocimientos…</string>
+
     <!--Errores-->
     <string name="recon_error_cargar">No pudimos cargar tus reconocimientos. Inténtalo de nuevo.</string>
 

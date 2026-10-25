@@ -2,6 +2,8 @@ package cl.duoc.data
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
+import cl.duoc.model.EstadoCompromisoId
+import cl.duoc.model.EstadoRecomendacionId
 import cl.duoc.util.Seguridad
 
 object DatosIniciales {
@@ -21,7 +23,7 @@ object DatosIniciales {
     private val AREAS = listOf("Soporte", "Comercial")
     private val RUBROS = listOf(
         "Inmobiliaria", "Educación escolar", "Crédito de consumo", "Seguros", "ONG", "Club deportivo",
-        "Educación superior", "Administración de arriendos", "Educación parvularia", "Otro",
+        "Educación superior", "Administración de arriendos", "Educación parvularia", "Administración de condominio", "Deporte", "Educación artística", "Otro",
     )
     private val ESTADOS_COMPROMISO = listOf("Pendiente", "Vencido", "Pagado", "En revisión", "Anulado")
     private val MOTIVOS_ANULACION = listOf("Repactación", "Error de registro", "Pagado directamente a la empresa", "Otro")
@@ -43,11 +45,11 @@ object DatosIniciales {
     )
 
     private data class UsuariosFinales(val rut: String, val nombres: String, val apellidos: String, val correo: String,
-                                val telefono: String, val comuna: String, val incorporacion: String, val diasAviso: Int?)
+                                       val telefono: String, val comuna: String, val incorporacion: String, val diasAviso: Int?)
     private data class Agentes(val rut: String, val nombres: String, val apellidos: String, val correo: String,
-                                val area: String, val activo: Boolean)
+                               val area: String, val activo: Boolean)
     private data class Ejecutivos(val rut: String, val nombres: String, val apellidos: String, val correo: String,
-                                val telefono: String, val idEmpresa: Int, val cargo: String)
+                                  val telefono: String, val idEmpresa: Int, val cargo: String)
     private data class Empresas(val codigo: String, val razonSocial: String, val nombreFantasia: String, val rut: String,
                                 val rubro: String, val correo: String, val telefono: String, val recargo: Int)
 
@@ -89,6 +91,66 @@ object DatosIniciales {
         Ejecutivos("9846217-1", "Gloria Inés", "Carrasco Vega", "gcarrasco@loshalcones.ejemplo", "+56 9 0000 0405", 6, "Tesorera"),
         Ejecutivos("18930571-0", "Sebastián Andrés", "Núñez Olivares", "snunez@itcordillera.ejemplo", "+56 9 0000 0406", 7, "Analista de finanzas"),
         Ejecutivos("12584396-4", "Mónica Patricia", "Leiva Castro", "mleiva@plazaoriente.ejemplo", "+56 9 0000 0407", 8, "Administradora de cobranza"),
+    )
+
+    // ---------------------------------------------------------------------------------------------------------------
+    // Anexo 9 · Compromisos de pago (fecha de referencia 06-10-2026). Los CP-2026-0064/0072/0081/0089/0090/0091/0095/0098
+    // no están en la tabla de compromisos del anexo, pero los comprobantes y reportes del anexo los referencian.
+    // ---------------------------------------------------------------------------------------------------------------
+    private const val PEND = EstadoCompromisoId.PENDIENTE
+    private const val VENC = EstadoCompromisoId.VENCIDO
+    private const val PAG = EstadoCompromisoId.PAGADO
+    private const val REV = EstadoCompromisoId.EN_REVISION
+    private const val ANUL = EstadoCompromisoId.ANULADO
+
+    private val COMPROMISOS_ANEXO = listOf(
+        CompromisoSemilla("CP-2026-0064", 1, 8, "Arriendo departamento julio", 7, 12, 520000, "2026-07-10", PAG, 0, "2026-07-09T10:20:00", "2026-06-30T09:00:00", 7),
+        CompromisoSemilla("CP-2026-0072", 2, 1, "Cuota pie departamento", 13, 36, 310000, "2026-08-31", PAG, 8500, "2026-09-02T21:14:00", "2026-08-21T09:00:00", 1),
+        CompromisoSemilla("CP-2026-0081", 5, 2, "Matrícula 2026", null, null, 120000, "2026-09-01", ANUL, 0, "2026-09-05T11:00:00", "2026-08-22T09:00:00", 2),
+        CompromisoSemilla("CP-2026-0089", 1, 8, "Arriendo departamento septiembre", 9, 12, 520000, "2026-09-10", PAG, 0, "2026-09-09T13:05:00", "2026-08-31T09:00:00", 7),
+        CompromisoSemilla("CP-2026-0090", 1, 6, "Cuota social septiembre", 9, 12, 15000, "2026-09-05", PAG, 2000, "2026-09-07T18:40:00", "2026-08-26T09:00:00", 5),
+        CompromisoSemilla("CP-2026-0091", 1, 5, "Aporte mensual septiembre", null, null, 10000, "2026-09-15", PAG, 0, "2026-09-15T08:22:00", "2026-09-01T09:00:00", null),
+        CompromisoSemilla("CP-2026-0095", 8, 6, "Cuota de incorporación", null, null, 25000, "2026-10-10", REV, 0, "2026-09-30T00:00:00", "2026-09-28T09:00:00", 5),
+        CompromisoSemilla("CP-2026-0098", 5, 2, "Mensualidad septiembre", 7, 10, 185000, "2026-09-10", PAG, 0, "2026-09-10T22:31:00", "2026-08-31T09:00:00", 2),
+        CompromisoSemilla("CP-2026-0101", 1, 8, "Arriendo departamento octubre", 10, 12, 520000, "2026-10-10", PEND, 0, "2026-10-01T09:00:00", "2026-10-01T09:00:00", 7),
+        CompromisoSemilla("CP-2026-0102", 1, 6, "Cuota social octubre", 10, 12, 15000, "2026-10-05", VENC, 2000, "2026-10-06T00:00:00", "2026-09-25T09:00:00", 5),
+        CompromisoSemilla("CP-2026-0103", 1, 5, "Aporte mensual octubre", null, null, 10000, "2026-10-15", PEND, 0, "2026-10-01T09:00:00", "2026-10-01T09:00:00", null),
+        CompromisoSemilla("CP-2026-0104", 1, 3, "Crédito de consumo", 7, 24, 86400, "2026-09-25", PAG, 0, "2026-09-24T10:42:00", "2026-09-15T09:00:00", 3),
+        CompromisoSemilla("CP-2026-0105", 1, 3, "Crédito de consumo", 8, 24, 86400, "2026-10-25", PEND, 0, "2026-10-01T09:00:00", "2026-10-01T09:00:00", 3),
+        CompromisoSemilla("CP-2026-0106", 2, 1, "Cuota pie departamento", 14, 36, 310000, "2026-09-30", VENC, 8500, "2026-10-01T00:00:00", "2026-09-20T09:00:00", 1),
+        CompromisoSemilla("CP-2026-0107", 2, 1, "Cuota pie departamento", 15, 36, 310000, "2026-10-30", PEND, 0, "2026-10-01T09:00:00", "2026-10-01T09:00:00", 1),
+        CompromisoSemilla("CP-2026-0108", 3, 4, "Seguro de hogar octubre", 10, 12, 18900, "2026-10-01", PAG, 0, "2026-09-30T19:05:00", "2026-09-21T09:00:00", null),
+        CompromisoSemilla("CP-2026-0109", 4, 7, "Arancel octubre", 8, 10, 142000, "2026-10-05", REV, 0, "2026-10-03T00:00:00", "2026-09-25T09:00:00", 6),
+        CompromisoSemilla("CP-2026-0110", 5, 2, "Mensualidad octubre", 8, 10, 185000, "2026-10-10", PEND, 0, "2026-10-01T09:00:00", "2026-10-01T09:00:00", 2),
+        CompromisoSemilla("CP-2026-0111", 6, 3, "Crédito de consumo", 19, 36, 54200, "2026-09-20", ANUL, 0, "2026-09-22T09:30:00", "2026-09-10T09:00:00", 4),
+        CompromisoSemilla("CP-2026-0112", 7, 6, "Cuota social octubre", 10, 12, 15000, "2026-10-05", PAG, 0, "2026-10-04T08:15:00", "2026-09-25T09:00:00", 5),
+    )
+
+    // N° comprobante, folio, fecha y hora, monto pagado (incluye recargo), canal, medio de pago (1 débito, 2 crédito, 3 transferencia, 4 simulado)
+    private val PAGOS_ANEXO = listOf(
+        PagoSemilla("CPR-000377", "CP-2026-0072", "2026-09-02T21:14:00", 318500, 3, 3),
+        PagoSemilla("CPR-000398", "CP-2026-0089", "2026-09-09T13:05:00", 520000, 2, 1),
+        PagoSemilla("CPR-000402", "CP-2026-0090", "2026-09-07T18:40:00", 17000, 2, 1),
+        PagoSemilla("CPR-000405", "CP-2026-0091", "2026-09-15T08:22:00", 10000, 3, 3),
+        PagoSemilla("CPR-000447", "CP-2026-0098", "2026-09-10T22:31:00", 185000, 2, 2),
+        PagoSemilla("CPR-000451", "CP-2026-0104", "2026-09-24T10:42:00", 86400, 2, 1),
+        PagoSemilla("CPR-000452", "CP-2026-0108", "2026-09-30T19:05:00", 18900, 3, 3),
+        PagoSemilla("CPR-000453", "CP-2026-0112", "2026-10-04T08:15:00", 15000, 1, 4),
+        PagoSemilla("CPR-000300", "CP-2026-0064", "2026-07-09T10:20:00", 520000, 2, 1),
+    )
+
+    private data class RecomendacionSemilla(
+        val numero: String, val usuarioFinal: Int, val organizacion: String,
+        val rubro: String, val comuna: String, val fecha: String, val estado: Int,
+    )
+
+    private val RECOMENDACIONES = listOf(
+        RecomendacionSemilla("REC-0001", 1, "Jardín Infantil Pequeños Exploradores", "Educación parvularia", "Maipú", "2026-08-12T10:00:00", EstadoRecomendacionId.SE_UNIO),
+        RecomendacionSemilla("REC-0002", 1, "Comunidad Edificio Parque Los Olmos", "Administración de condominio", "Maipú", "2026-09-02T10:00:00", EstadoRecomendacionId.CONTACTADA),
+        RecomendacionSemilla("REC-0003", 3, "Gimnasio Fuerza Sur", "Deporte", "San Miguel", "2026-09-15T10:00:00", EstadoRecomendacionId.EN_EVALUACION),
+        RecomendacionSemilla("REC-0004", 5, "Academia de Música Clave de Sol", "Educación artística", "Ñuñoa", "2026-09-20T10:00:00", EstadoRecomendacionId.RECIBIDA),
+        RecomendacionSemilla("REC-0005", 4, "Colegio Bosque Nativo", "Educación escolar", "La Florida", "2026-09-22T10:00:00", EstadoRecomendacionId.DESCARTADA),
+        RecomendacionSemilla("REC-0006", 7, "Corporación Deportiva Cordillera", "Club deportivo", "San Bernardo", "2026-10-01T10:00:00", EstadoRecomendacionId.RECIBIDA),
     )
 
     private const val FECHA_REFERENCIA = "2026-10-06T00:00:00"
@@ -167,72 +229,108 @@ object DatosIniciales {
             )
         }
 
-        val compromisosDemo = listOf(
-            listOf("F-1001", 1, 1, "Gastos comunes Dpto 402", 10, 12, 85000, "2026-10-15", 1, 0, "2026-10-01", "2026-10-01"),
-            listOf("F-1002", 1, 2, "Colegiatura Octubre", 8, 10, 120000, "2026-10-05", 2, 5000, "2026-10-06", "2026-09-25"),
-            listOf("F-1003", 1, 3, "Cuota crédito consumo", 3, 24, 45000, "2026-09-15", 3, 0, "2026-09-12", "2026-09-01"),
-            listOf("F-1004", 1, 8, "Arriendo local 12", 5, 12, 210000, "2026-10-20", 4, 0, "2026-10-02", "2026-10-01"),
-            listOf("F-2001", 2, 4, "Prima Seguro de Auto", 1, 12, 35000, "2026-10-18", 1, 0, "2026-10-01", "2026-10-01"),
-            listOf("F-2002", 2, 7, "Matrícula Semestre 2", 1, 1, 180000, "2026-09-28", 2, 6000, "2026-09-29", "2026-09-01")
-        )
+        val primerIdAgente = USUARIOS_FINALES.size + 1
+        val primerIdEjecutivo = USUARIOS_FINALES.size + AGENTES.size + 1
 
-        compromisosDemo.forEachIndexed { i, c ->
-            db.insertar(
+        // Compromisos (Anexo 9 + historial sintético) y sus pagos / comprobantes
+        val idCompromiso = HashMap<String, Long>()
+        (COMPROMISOS_ANEXO + DatosHistoricos.COMPROMISOS).forEach { c ->
+            idCompromiso[c.folio] = db.insertar(
                 "compromiso",
-                "id_compromiso" to i + 1,
-                "folio" to c[0],
-                "id_usuario_final" to c[1],
-                "id_empresa" to c[2],
-                "concepto" to c[3],
-                "numero_cuota" to c[4],
-                "total_cuotas" to c[5],
-                "monto" to c[6],
-                "fecha_vencimiento" to c[7],
-                "id_estado_compromiso" to c[8],
-                "recargo_aplicado" to c[9],
-                "fecha_cambio_estado" to c[10],
-                "fecha_registro" to c[11]
+                "folio" to c.folio, "id_usuario_final" to c.usuarioFinal, "id_empresa" to c.empresa,
+                "concepto" to c.concepto, "numero_cuota" to c.cuota, "total_cuotas" to c.totalCuotas,
+                "monto" to c.monto, "fecha_vencimiento" to c.vencimiento, "id_estado_compromiso" to c.estado,
+                "recargo_aplicado" to c.recargo, "fecha_cambio_estado" to c.cambioEstado,
+                "id_ejecutivo_registro" to c.ejecutivo?.let { primerIdEjecutivo + it - 1 },
+                "fecha_registro" to c.registro,
+            )
+        }
+        (PAGOS_ANEXO + DatosHistoricos.PAGOS).forEach { p ->
+            db.insertar(
+                "pago",
+                "numero_comprobante" to p.comprobante, "id_compromiso" to idCompromiso.getValue(p.folio),
+                "fecha_hora" to p.fechaHora, "monto_pagado" to p.monto, "id_canal" to p.canal, "id_medio_pago" to p.medioPago,
             )
         }
 
+        // Anulaciones (RN-21): CP-0111 por EJ-04 (repactación) y CP-0081 por EJ-02 (cobro duplicado)
         db.insertar(
-            "pago",
-            "id_pago" to 1,
-            "numero_comprobante" to "CMP-88001",
-            "id_compromiso" to 3,
-            "fecha_hora" to "2026-09-12T14:30:00",
-            "monto_pagado" to 45000,
-            "id_canal" to 1,
-            "id_medio_pago" to 1
+            "anulacion", "id_compromiso" to idCompromiso.getValue("CP-2026-0111"), "id_ejecutivo" to primerIdEjecutivo + 3,
+            "id_motivo_anulacion" to 1, "comentario" to null, "fecha" to "2026-09-22T09:30:00",
+        )
+        db.insertar(
+            "anulacion", "id_compromiso" to idCompromiso.getValue("CP-2026-0081"), "id_ejecutivo" to primerIdEjecutivo + 1,
+            "id_motivo_anulacion" to 2, "comentario" to "Cobro duplicado", "fecha" to "2026-09-05T11:00:00",
         )
 
-        db.insertar(
+        // Reportes del Anexo 9. REP-0012 (Luis) no se carga a propósito: dejaría CP-0106 En revisión y se perdería el
+        // caso de orden de pago de HU-03 CA-4 (cuota 14/36 vencida antes que la 15/36). Luis puede crearlo desde la app.
+        fun reporte(
+            numero: String, folio: String, motivo: Int, comentario: String, creacion: String, estado: Int,
+            agente: Int?, toma: String?, respuesta: String?, resolucion: String?,
+        ) = db.insertar(
             "reporte",
-            "id_reporte" to 1,
-            "numero" to "REP-001",
-            "id_compromiso" to 4,
-            "id_motivo_reporte" to 1,
-            "comentario" to "Transferí directamente a la cuenta del arriendo el 1 de Octubre",
-            "fecha_creacion" to "2026-10-02T10:15:00",
-            "id_estado_reporte" to 1
+            "numero" to numero, "id_compromiso" to idCompromiso.getValue(folio), "id_motivo_reporte" to motivo,
+            "comentario" to comentario, "fecha_creacion" to creacion, "id_estado_reporte" to estado,
+            "id_agente" to agente?.let { primerIdAgente + it - 1 }, "fecha_toma" to toma,
+            "respuesta" to respuesta, "fecha_resolucion" to resolucion,
         )
+        reporte("REP-0005", "CP-2026-0064", 4, "El concepto dice \"agosto\" y es la cuota de julio.", "2026-07-28T10:00:00",
+            3, 1, "2026-07-29T09:00:00", "Se corrigió el concepto; el monto era correcto.", "2026-07-30T12:00:00")
+        reporte("REP-0007", "CP-2026-0081", 2, "Me aparece una matrícula que ya pagué en marzo.", "2026-09-02T09:30:00",
+            3, 2, "2026-09-03T09:00:00", "Cobro duplicado anulado por el colegio.", "2026-09-05T11:00:00")
+        reporte("REP-0009", "CP-2026-0111", 3, "Repacté el crédito y me siguen cobrando la cuota antigua.", "2026-09-18T18:10:00",
+            3, 1, "2026-09-19T09:00:00", "La empresa anuló la cuota por repactación.", "2026-09-22T09:30:00")
+        // REP-0010: Abierto y con más de 2 días hábiles sin gestionar (atrasado, RN-23)
+        reporte("REP-0010", "CP-2026-0095", 2, "Me llegó un cobro de un club al que no pertenezco.", "2026-09-30T00:00:00",
+            1, null, null, null, null)
+        reporte("REP-0011", "CP-2026-0109", 1, "Pagué por transferencia directa al instituto el 03-10.", "2026-10-03T00:00:00",
+            2, 2, "2026-10-05T10:00:00", null, null)
+
+        // Recomendaciones (RF-12) del Anexo 9 con el último cambio de estado que informa el anexo (RNF-15).
+        RECOMENDACIONES.forEachIndexed { i, r ->
+            db.insertar(
+                "recomendacion",
+                "id_recomendacion" to i + 1, "numero" to r.numero, "id_usuario_final" to r.usuarioFinal,
+                "nombre_organizacion" to r.organizacion, "id_rubro" to RUBROS.indexOf(r.rubro) + 1,
+                "id_comuna" to COMUNAS.indexOf(r.comuna) + 1, "fecha" to r.fecha, "id_estado_recomendacion" to r.estado,
+            )
+        }
+        // Contactos autorizados (RN-12): solo existen donde el anexo indica "Autoriza contacto: Sí"
+        db.insertar("contacto_recomendacion", "id_recomendacion" to 1, "nombre" to "Paula Herrera",
+            "correo" to "pherrera@pexploradores.ejemplo", "telefono" to null, "autoriza_contacto" to true)
+        db.insertar("contacto_recomendacion", "id_recomendacion" to 3, "nombre" to "Raúl Ibáñez",
+            "correo" to null, "telefono" to "+56 9 0000 0301", "autoriza_contacto" to true)
+        db.insertar("contacto_recomendacion", "id_recomendacion" to 6, "nombre" to "Ana Valdés",
+            "correo" to "avaldes@cdcordillera.ejemplo", "telefono" to null, "autoriza_contacto" to true)
+        // Último cambio de estado: REC-0001 AG-04 (25-09), REC-0002 AG-05 (10-09), REC-0003 AG-04 (28-09), REC-0005 AG-05 (23-09)
+        fun cambioEstado(idRecomendacion: Int, estado: Int, agente: Int, fecha: String, motivo: String? = null) = db.insertar(
+            "historial_recomendacion",
+            "id_recomendacion" to idRecomendacion, "id_estado_recomendacion" to estado,
+            "id_agente" to primerIdAgente + agente - 1, "fecha" to fecha, "motivo" to motivo,
+        )
+        cambioEstado(1, EstadoRecomendacionId.SE_UNIO, 4, "2026-09-25T10:00:00")
+        cambioEstado(2, EstadoRecomendacionId.CONTACTADA, 5, "2026-09-10T10:00:00")
+        cambioEstado(3, EstadoRecomendacionId.EN_EVALUACION, 4, "2026-09-28T10:00:00")
+        cambioEstado(5, EstadoRecomendacionId.DESCARTADA, 5, "2026-09-23T10:00:00", "La organización ya es cliente de PagoFlex")
     }
 
     private fun catalogo(db: SQLiteDatabase, tabla: String, columnaId: String, nombres: List<String>) {
         nombres.forEachIndexed { i, nombre -> db.insertar(tabla, columnaId to i + 1, "nombre" to nombre) }
     }
 
-    private fun SQLiteDatabase.insertar(tabla: String, vararg campos: Pair<String, Any?>) {
+    private fun SQLiteDatabase.insertar(tabla: String, vararg campos: Pair<String, Any?>): Long {
         val valores = ContentValues()
         for ((columna, valor) in campos) {
             when (valor) {
                 null -> valores.putNull(columna)
                 is Int -> valores.put(columna, valor)
+                is Long -> valores.put(columna, valor)
                 is Boolean -> valores.put(columna, if (valor) 1 else 0)
                 is String -> valores.put(columna, valor)
                 else -> error("Tipo no soportado en la semilla: ${valor::class}")
             }
         }
-        insertOrThrow(tabla, null, valores)
+        return insertOrThrow(tabla, null, valores)
     }
 }

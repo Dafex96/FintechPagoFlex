@@ -6,6 +6,7 @@ import cl.duoc.data.PagoFlexDbHelper
 import cl.duoc.model.Compromiso
 import cl.duoc.model.NuevoCompromisoEmpresa
 import cl.duoc.model.ResumenCobranza
+import cl.duoc.notificaciones.AvisosScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,6 +38,9 @@ class EjecutivoViewModel(application: Application) : AndroidViewModel(applicatio
         if (idEmpresa == null) return
         currentEmpresaId = idEmpresa
         currentEjecutivoId = idEjecutivo
+
+        // Avisa si algún compromiso de su empresa quedó En revisión por un reporte.
+        AvisosScheduler.verificarAhora(getApplication())
 
         val resumen = db.obtenerResumenCobranzaEmpresa(idEmpresa)
         val compromisos = db.listarCompromisosEmpresa(idEmpresa, _uiState.value.filtroEstado)
