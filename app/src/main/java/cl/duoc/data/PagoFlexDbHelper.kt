@@ -7,8 +7,13 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import cl.duoc.model.AvisoAnticipacion
 import cl.duoc.model.CambiosPerfil
+import cl.duoc.model.Compromiso
 import cl.duoc.model.Comuna
+import cl.duoc.model.EstadoCompromisoId
 import cl.duoc.model.NuevoUsuario
+import cl.duoc.model.Pago
+import cl.duoc.model.Reporte
+import cl.duoc.model.ResumenInicioUsuario
 import cl.duoc.model.RolCodigo
 import cl.duoc.model.Usuario
 import cl.duoc.util.Fechas
@@ -34,6 +39,41 @@ class PagoFlexDbHelper(context: Context) :
                     "LEFT JOIN COMUNA C ON U.ID_COMUNA = C.ID_COMUNA " +
                     "LEFT JOIN AREA A ON U.ID_AREA = A.ID_AREA " +
                     "LEFT JOIN EMPRESA_CLIENTE E ON U.ID_EMPRESA = E.ID_EMPRESA"
+
+        private const val SQL_SELECT_COMPROMISO =
+            "SELECT C.ID_COMPROMISO, C.FOLIO, C.ID_USUARIO_FINAL, C.ID_EMPRESA, " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, E.TELEFONO_ATENCION AS empresa_telefono, " +
+                    "E.CORREO_ATENCION AS empresa_correo, C.CONCEPTO, C.NUMERO_CUOTA, " +
+                    "C.TOTAL_CUOTAS, C.MONTO, C.FECHA_VENCIMIENTO, C.ID_ESTADO_COMPROMISO, " +
+                    "EC.NOMBRE AS estado_nombre, C.RECARGO_APLICADO, C.FECHA_CAMBIO_ESTADO, C.FECHA_REGISTRO " +
+                    "FROM COMPROMISO C " +
+                    "INNER JOIN EMPRESA_CLIENTE E ON C.ID_EMPRESA = E.ID_EMPRESA " +
+                    "INNER JOIN ESTADO_COMPROMISO EC ON C.ID_ESTADO_COMPROMISO = EC.ID_ESTADO_COMPROMISO"
+
+        private const val SQL_SELECT_PAGO =
+            "SELECT P.ID_PAGO, P.NUMERO_COMPROBANTE, P.ID_COMPROMISO, P.FECHA_HORA, " +
+                    "P.MONTO_PAGADO, P.ID_CANAL, CA.NOMBRE AS canal_nombre, " +
+                    "P.ID_MEDIO_PAGO, MP.NOMBRE AS medio_pago_nombre, " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, C.CONCEPTO, C.FOLIO AS folio_compromiso " +
+                    "FROM PAGO P " +
+                    "INNER JOIN CANAL CA ON P.ID_CANAL = CA.ID_CANAL " +
+                    "INNER JOIN MEDIO_PAGO MP ON P.ID_MEDIO_PAGO = MP.ID_MEDIO_PAGO " +
+                    "INNER JOIN COMPROMISO C ON P.ID_COMPROMISO = C.ID_COMPROMISO " +
+                    "INNER JOIN EMPRESA_CLIENTE E ON C.ID_EMPRESA = E.ID_EMPRESA"
+
+        private const val SQL_SELECT_REPORTE =
+            "SELECT R.ID_REPORTE, R.NUMERO, R.ID_COMPROMISO, C.FOLIO AS folio_compromiso, " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, C.CONCEPTO, R.ID_MOTIVO_REPORTE, " +
+                    "MR.NOMBRE AS motivo_nombre, R.COMENTARIO, R.FECHA_CREACION, " +
+                    "R.ID_ESTADO_REPORTE, ER.NOMBRE AS estado_nombre, R.ID_AGENTE, " +
+                    "AG.NOMBRES || ' ' || AG.APELLIDOS AS agente_nombre, R.FECHA_TOMA, " +
+                    "R.RESPUESTA, R.FECHA_RESOLUCION " +
+                    "FROM REPORTE R " +
+                    "INNER JOIN COMPROMISO C ON R.ID_COMPROMISO = C.ID_COMPROMISO " +
+                    "INNER JOIN EMPRESA_CLIENTE E ON C.ID_EMPRESA = E.ID_EMPRESA " +
+                    "INNER JOIN MOTIVO_REPORTE MR ON R.ID_MOTIVO_REPORTE = MR.ID_MOTIVO_REPORTE " +
+                    "INNER JOIN ESTADO_REPORTE ER ON R.ID_ESTADO_REPORTE = ER.ID_ESTADO_REPORTE " +
+                    "LEFT JOIN USUARIO AG ON R.ID_AGENTE = AG.ID_USUARIO"
     }
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -137,6 +177,212 @@ class PagoFlexDbHelper(context: Context) :
         }
         return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString()))
     }
+
+    fun listarCompromisosUsuario(idUsuario: Long, filtroEstado: Long? = null): List<Compromiso> {
+        val sql = StringBuilder("$SQL_SELECT_COMPROMISO WHERE C.ID_USUARIO_FINAL = ?")
+        val args = mutableListOf(idUsuario.toString())
+        if (filtroEstado != null) {
+            sql.append(" AND C.ID_ESTADO_COMPROMISO = ?")
+            args.add(filtroEstado.toString())
+        }
+        sql.append(" ORDER BY C.FECHA_VENCIMIENTO ASC")
+        return consultarCompromisos(sql.toString(), args.toTypedArray())
+    }
+
+    fun buscarCompromisoPorId(idCompromiso: Long): Compromiso? =
+        consultarCompromisos("$SQL_SELECT_COMPROMISO WHERE C.ID_COMPROMISO = ?", arrayOf(idCompromiso.toString()))
+            .firstOrNull()
+
+    fun obtenerResumenInicioUsuario(idUsuario: Long): ResumenInicioUsuario {
+        val compromisos = listarCompromisosUsuario(idUsuario)
+        val pendientes = compromisos.filter { it.esPendiente }
+        val vencidos = compromisos.filter { it.esVencido }
+        val total = (pendientes + vencidos).sumOf { it.montoTotal }
+        val proximo = (pendientes + vencidos).minByOrNull { it.fechaVencimiento }
+
+        return ResumenInicioUsuario(
+            totalMes = total,
+            proximoCompromiso = proximo,
+            cantidadVencidos = vencidos.size,
+            compromisosPendientes = pendientes,
+            compromisosVencidos = vencidos
+        )
+    }
+
+    fun registrarPago(idCompromiso: Long, idMedioPago: Long, idCanal: Long = 1): Pago {
+        val compromiso = buscarCompromisoPorId(idCompromiso) ?: error("Compromiso no encontrado")
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            val numComprobante = "CMP-${(10000..99999).random()}"
+            val ahoraIso = Fechas.ahoraIso()
+
+            val valoresPago = ContentValues().apply {
+                put("numero_comprobante", numComprobante)
+                put("id_compromiso", idCompromiso)
+                put("fecha_hora", ahoraIso)
+                put("monto_pagado", compromiso.montoTotal)
+                put("id_canal", idCanal)
+                put("id_medio_pago", idMedioPago)
+            }
+            val idPago = db.insertOrThrow("pago", null, valoresPago)
+
+            val valoresCompromiso = ContentValues().apply {
+                put("id_estado_compromiso", EstadoCompromisoId.PAGADO)
+                put("fecha_cambio_estado", ahoraIso)
+            }
+            db.update("compromiso", valoresCompromiso, "id_compromiso = ?", arrayOf(idCompromiso.toString()))
+
+            db.setTransactionSuccessful()
+            return obtenerPagoPorId(idPago) ?: error("No se pudo crear el pago")
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun obtenerPagoPorId(idPago: Long): Pago? =
+        consultarPagos("$SQL_SELECT_PAGO WHERE P.ID_PAGO = ?", arrayOf(idPago.toString())).firstOrNull()
+
+    fun obtenerPagoPorCompromiso(idCompromiso: Long): Pago? =
+        consultarPagos("$SQL_SELECT_PAGO WHERE P.ID_COMPROMISO = ?", arrayOf(idCompromiso.toString())).firstOrNull()
+
+    fun listarPagosUsuario(idUsuario: Long): List<Pago> =
+        consultarPagos(
+            "$SQL_SELECT_PAGO WHERE C.ID_USUARIO_FINAL = ? ORDER BY P.FECHA_HORA DESC",
+            arrayOf(idUsuario.toString())
+        )
+
+    fun registrarReporte(idCompromiso: Long, idMotivo: Long, comentario: String?): Reporte {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            val numReporte = "REP-${(1000..9999).random()}"
+            val ahoraIso = Fechas.ahoraIso()
+
+            val valoresReporte = ContentValues().apply {
+                put("numero", numReporte)
+                put("id_compromiso", idCompromiso)
+                put("id_motivo_reporte", idMotivo)
+                if (!comentario.isNullOrBlank()) put("comentario", comentario) else putNull("comentario")
+                put("fecha_creacion", ahoraIso)
+                put("id_estado_reporte", 1)
+            }
+            val idReporte = db.insertOrThrow("reporte", null, valoresReporte)
+
+            val valoresCompromiso = ContentValues().apply {
+                put("id_estado_compromiso", EstadoCompromisoId.EN_REVISION)
+                put("fecha_cambio_estado", ahoraIso)
+            }
+            db.update("compromiso", valoresCompromiso, "id_compromiso = ?", arrayOf(idCompromiso.toString()))
+
+            db.setTransactionSuccessful()
+            return consultarReportes("$SQL_SELECT_REPORTE WHERE R.ID_REPORTE = ?", arrayOf(idReporte.toString())).first()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun obtenerReportePorCompromiso(idCompromiso: Long): Reporte? =
+        consultarReportes("$SQL_SELECT_REPORTE WHERE R.ID_COMPROMISO = ?", arrayOf(idCompromiso.toString())).firstOrNull()
+
+    fun listarReportesUsuario(idUsuario: Long): List<Reporte> =
+        consultarReportes(
+            "$SQL_SELECT_REPORTE WHERE C.ID_USUARIO_FINAL = ? ORDER BY R.FECHA_CREACION DESC",
+            arrayOf(idUsuario.toString())
+        )
+
+    fun actualizarAvisosUsuario(idUsuario: Long, activos: Boolean, diasAnticipacion: Int): Boolean {
+        val valores = ContentValues().apply {
+            put("avisos_activos", if (activos) 1 else 0)
+            put("dias_anticipacion", diasAnticipacion)
+        }
+        return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
+    }
+
+    private fun consultarCompromisos(sql: String, args: Array<String>?): List<Compromiso> {
+        val lista = mutableListOf<Compromiso>()
+        readableDatabase.rawQuery(sql, args).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(leerCompromiso(cursor))
+            }
+        }
+        return lista
+    }
+
+    private fun leerCompromiso(cursor: Cursor) = Compromiso(
+        id = cursor.getLong(cursor.getColumnIndexOrThrow("id_compromiso")),
+        folio = cursor.getString(cursor.getColumnIndexOrThrow("folio")),
+        idUsuarioFinal = cursor.getLong(cursor.getColumnIndexOrThrow("id_usuario_final")),
+        idEmpresa = cursor.getLong(cursor.getColumnIndexOrThrow("id_empresa")),
+        empresaNombre = cursor.getString(cursor.getColumnIndexOrThrow("empresa_nombre")),
+        empresaTelefono = cursor.getString(cursor.getColumnIndexOrThrow("empresa_telefono")),
+        empresaCorreo = cursor.getString(cursor.getColumnIndexOrThrow("empresa_correo")),
+        concepto = cursor.getString(cursor.getColumnIndexOrThrow("concepto")),
+        numeroCuota = cursor.largoONulo("numero_cuota")?.toInt(),
+        totalCuotas = cursor.largoONulo("total_cuotas")?.toInt(),
+        monto = cursor.getInt(cursor.getColumnIndexOrThrow("monto")),
+        fechaVencimiento = cursor.getString(cursor.getColumnIndexOrThrow("fecha_vencimiento")),
+        idEstadoCompromiso = cursor.getLong(cursor.getColumnIndexOrThrow("id_estado_compromiso")),
+        estadoNombre = cursor.getString(cursor.getColumnIndexOrThrow("estado_nombre")),
+        recargoAplicado = cursor.getInt(cursor.getColumnIndexOrThrow("recargo_aplicado")),
+        fechaCambioEstado = cursor.getString(cursor.getColumnIndexOrThrow("fecha_cambio_estado")),
+        fechaRegistro = cursor.getString(cursor.getColumnIndexOrThrow("fecha_registro"))
+    )
+
+    private fun consultarPagos(sql: String, args: Array<String>?): List<Pago> {
+        val lista = mutableListOf<Pago>()
+        readableDatabase.rawQuery(sql, args).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(leerPago(cursor))
+            }
+        }
+        return lista
+    }
+
+    private fun leerPago(cursor: Cursor) = Pago(
+        id = cursor.getLong(cursor.getColumnIndexOrThrow("id_pago")),
+        numeroComprobante = cursor.getString(cursor.getColumnIndexOrThrow("numero_comprobante")),
+        idCompromiso = cursor.getLong(cursor.getColumnIndexOrThrow("id_compromiso")),
+        fechaHora = cursor.getString(cursor.getColumnIndexOrThrow("fecha_hora")),
+        montoPagado = cursor.getInt(cursor.getColumnIndexOrThrow("monto_pagado")),
+        idCanal = cursor.getLong(cursor.getColumnIndexOrThrow("id_canal")),
+        canalNombre = cursor.getString(cursor.getColumnIndexOrThrow("canal_nombre")),
+        idMedioPago = cursor.getLong(cursor.getColumnIndexOrThrow("id_medio_pago")),
+        medioPagoNombre = cursor.getString(cursor.getColumnIndexOrThrow("medio_pago_nombre")),
+        empresaNombre = cursor.getString(cursor.getColumnIndexOrThrow("empresa_nombre")),
+        concepto = cursor.getString(cursor.getColumnIndexOrThrow("concepto")),
+        folioCompromiso = cursor.getString(cursor.getColumnIndexOrThrow("folio_compromiso"))
+    )
+
+    private fun consultarReportes(sql: String, args: Array<String>?): List<Reporte> {
+        val lista = mutableListOf<Reporte>()
+        readableDatabase.rawQuery(sql, args).use { cursor ->
+            while (cursor.moveToNext()) {
+                lista.add(leerReporte(cursor))
+            }
+        }
+        return lista
+    }
+
+    private fun leerReporte(cursor: Cursor) = Reporte(
+        id = cursor.getLong(cursor.getColumnIndexOrThrow("id_reporte")),
+        numero = cursor.getString(cursor.getColumnIndexOrThrow("numero")),
+        idCompromiso = cursor.getLong(cursor.getColumnIndexOrThrow("id_compromiso")),
+        folioCompromiso = cursor.getString(cursor.getColumnIndexOrThrow("folio_compromiso")),
+        empresaNombre = cursor.getString(cursor.getColumnIndexOrThrow("empresa_nombre")),
+        concepto = cursor.getString(cursor.getColumnIndexOrThrow("concepto")),
+        idMotivoReporte = cursor.getLong(cursor.getColumnIndexOrThrow("id_motivo_reporte")),
+        motivoNombre = cursor.getString(cursor.getColumnIndexOrThrow("motivo_nombre")),
+        comentario = cursor.textoONulo("comentario"),
+        fechaCreacion = cursor.getString(cursor.getColumnIndexOrThrow("fecha_creacion")),
+        idEstadoReporte = cursor.getLong(cursor.getColumnIndexOrThrow("id_estado_reporte")),
+        estadoNombre = cursor.getString(cursor.getColumnIndexOrThrow("estado_nombre")),
+        idAgente = cursor.largoONulo("id_agente"),
+        agenteNombre = cursor.textoONulo("agente_nombre"),
+        fechaToma = cursor.textoONulo("fecha_toma"),
+        respuesta = cursor.textoONulo("respuesta"),
+        fechaResolucion = cursor.textoONulo("fecha_resolucion")
+    )
 
     private fun consultarUsuarios(sql: String, args: Array<String>?): List<Usuario> {
         val lista = mutableListOf<Usuario>()

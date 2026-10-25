@@ -12,8 +12,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.R
 import cl.duoc.ui.screens.EditarPerfilScreen
+import cl.duoc.ui.screens.HistorialPagosScreen
 import cl.duoc.ui.screens.InicioScreen
+import cl.duoc.ui.screens.InicioUsuarioScreen
 import cl.duoc.ui.screens.LoginScreen
+import cl.duoc.ui.screens.MisCompromisosScreen
 import cl.duoc.ui.screens.PerfilScreen
 import cl.duoc.ui.screens.RecuperarContrasenaScreen
 import cl.duoc.ui.screens.RegistroScreen
@@ -68,15 +71,48 @@ fun AppNavegacion() {
 
         composable(Ruta.Inicio.ruta) {
             usuarioActual?.let { usuario ->
-                InicioScreen(
-                    usuario = usuario,
-                    onIrAPerfil = { navController.navigate(Ruta.Perfil.ruta) },
-                    onCerrarSesion = {
-                        sesionViewModel.cerrarSesion()
-                        navController.navigate(Ruta.Login.ruta) {
-                            popUpTo(Ruta.Inicio.ruta) { inclusive = true }
+                if (usuario.esUsuarioFinal) {
+                    InicioUsuarioScreen(
+                        usuario = usuario,
+                        onIrACompromisos = { navController.navigate(Ruta.Compromisos.ruta) },
+                        onIrAHistorial = { navController.navigate(Ruta.HistorialPagos.ruta) },
+                        onIrAPerfil = { navController.navigate(Ruta.Perfil.ruta) },
+                        onCerrarSesion = {
+                            sesionViewModel.cerrarSesion()
+                            navController.navigate(Ruta.Login.ruta) {
+                                popUpTo(Ruta.Inicio.ruta) { inclusive = true }
+                            }
                         }
-                    }
+                    )
+                } else {
+                    InicioScreen(
+                        usuario = usuario,
+                        onIrAPerfil = { navController.navigate(Ruta.Perfil.ruta) },
+                        onCerrarSesion = {
+                            sesionViewModel.cerrarSesion()
+                            navController.navigate(Ruta.Login.ruta) {
+                                popUpTo(Ruta.Inicio.ruta) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        composable(Ruta.Compromisos.ruta) {
+            usuarioActual?.let { usuario ->
+                MisCompromisosScreen(
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() }
+                )
+            }
+        }
+
+        composable(Ruta.HistorialPagos.ruta) {
+            usuarioActual?.let { usuario ->
+                HistorialPagosScreen(
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() }
                 )
             }
         }

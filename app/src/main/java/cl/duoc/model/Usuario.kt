@@ -27,4 +27,8 @@ data class Usuario(
 
     val iniciales: String
         get() = (nombres.firstOrNull()?.toString() ?: "") + (apellidos.firstOrNull()?.toString() ?: "")
+
+    val esUsuarioFinal: Boolean get() = rolCodigo == RolCodigo.USUARIO_FINAL
+    val esAgente: Boolean get() = rolCodigo == RolCodigo.AGENTE
+    val esEjecutivo: Boolean get() = rolCodigo == RolCodigo.EJECUTIVO
 }

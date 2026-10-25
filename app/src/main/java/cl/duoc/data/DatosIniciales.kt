@@ -166,15 +166,62 @@ object DatosIniciales {
                 "id_empresa" to e.idEmpresa, "cargo" to e.cargo,
             )
         }
-    }
 
-    // ----- Ayudas privadas -----
+        val compromisosDemo = listOf(
+            listOf("F-1001", 1, 1, "Gastos comunes Dpto 402", 10, 12, 85000, "2026-10-15", 1, 0, "2026-10-01", "2026-10-01"),
+            listOf("F-1002", 1, 2, "Colegiatura Octubre", 8, 10, 120000, "2026-10-05", 2, 5000, "2026-10-06", "2026-09-25"),
+            listOf("F-1003", 1, 3, "Cuota crédito consumo", 3, 24, 45000, "2026-09-15", 3, 0, "2026-09-12", "2026-09-01"),
+            listOf("F-1004", 1, 8, "Arriendo local 12", 5, 12, 210000, "2026-10-20", 4, 0, "2026-10-02", "2026-10-01"),
+            listOf("F-2001", 2, 4, "Prima Seguro de Auto", 1, 12, 35000, "2026-10-18", 1, 0, "2026-10-01", "2026-10-01"),
+            listOf("F-2002", 2, 7, "Matrícula Semestre 2", 1, 1, 180000, "2026-09-28", 2, 6000, "2026-09-29", "2026-09-01")
+        )
+
+        compromisosDemo.forEachIndexed { i, c ->
+            db.insertar(
+                "compromiso",
+                "id_compromiso" to i + 1,
+                "folio" to c[0],
+                "id_usuario_final" to c[1],
+                "id_empresa" to c[2],
+                "concepto" to c[3],
+                "numero_cuota" to c[4],
+                "total_cuotas" to c[5],
+                "monto" to c[6],
+                "fecha_vencimiento" to c[7],
+                "id_estado_compromiso" to c[8],
+                "recargo_aplicado" to c[9],
+                "fecha_cambio_estado" to c[10],
+                "fecha_registro" to c[11]
+            )
+        }
+
+        db.insertar(
+            "pago",
+            "id_pago" to 1,
+            "numero_comprobante" to "CMP-88001",
+            "id_compromiso" to 3,
+            "fecha_hora" to "2026-09-12T14:30:00",
+            "monto_pagado" to 45000,
+            "id_canal" to 1,
+            "id_medio_pago" to 1
+        )
+
+        db.insertar(
+            "reporte",
+            "id_reporte" to 1,
+            "numero" to "REP-001",
+            "id_compromiso" to 4,
+            "id_motivo_reporte" to 1,
+            "comentario" to "Transferí directamente a la cuenta del arriendo el 1 de Octubre",
+            "fecha_creacion" to "2026-10-02T10:15:00",
+            "id_estado_reporte" to 1
+        )
+    }
 
     private fun catalogo(db: SQLiteDatabase, tabla: String, columnaId: String, nombres: List<String>) {
         nombres.forEachIndexed { i, nombre -> db.insertar(tabla, columnaId to i + 1, "nombre" to nombre) }
     }
 
-    /** Inserta una fila. ContentValues escapa los textos por nosotros (sin riesgo de inyección SQL). */
     private fun SQLiteDatabase.insertar(tabla: String, vararg campos: Pair<String, Any?>) {
         val valores = ContentValues()
         for ((columna, valor) in campos) {
