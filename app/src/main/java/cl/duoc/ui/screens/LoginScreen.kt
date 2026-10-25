@@ -49,6 +49,7 @@ import cl.duoc.viewmodel.LoginViewModel
 fun LoginScreen(
     onLoginExitoso: (Usuario) -> Unit,
     onIrARegistro: () -> Unit,
+    onIrARecuperarContrasena: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -60,7 +61,8 @@ fun LoginScreen(
         onAlternarVisibilidad = viewModel::onAlternarVisibilidad,
         onIngresar = { viewModel.onIngresar()?.let { usuario -> onLoginExitoso(usuario) } },
         onUsarCuentaDemo = viewModel::onUsarCuentaDemo,
-        onIrARegistro = onIrARegistro
+        onIrARegistro = onIrARegistro,
+        onIrARecuperarContrasena = onIrARecuperarContrasena
     )
 }
 
@@ -72,7 +74,8 @@ fun LoginContent(
     onAlternarVisibilidad: () -> Unit,
     onIngresar: () -> Unit,
     onUsarCuentaDemo: (CuentaDemo) -> Unit,
-    onIrARegistro: () -> Unit
+    onIrARegistro: () -> Unit,
+    onIrARecuperarContrasena: () -> Unit
 ) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
@@ -126,6 +129,13 @@ fun LoginContent(
                     error = uiState.errorContrasena?.texto(),
                     onListo = onIngresar
                 )
+
+                TextButton(
+                    onClick = onIrARecuperarContrasena,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(text = stringResource(R.string.login_btn_olvide_contrasena))
+                }
 
                 uiState.errorGeneral?.let { error ->
                     Card(
@@ -216,7 +226,7 @@ private fun LoginVacioPreview() {
         LoginContent(
             uiState = LoginUiState(),
             onRutCambia = {}, onContrasenaCambia = {}, onAlternarVisibilidad = {},
-            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}
+            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}, onIrARecuperarContrasena = {}
         )
     }
 }
@@ -233,7 +243,7 @@ private fun LoginConErroresPreview() {
                 errorGeneral = ErrorLogin.CREDENCIALES
             ),
             onRutCambia = {}, onContrasenaCambia = {}, onAlternarVisibilidad = {},
-            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}
+            onIngresar = {}, onUsarCuentaDemo = {}, onIrARegistro = {}, onIrARecuperarContrasena = {}
         )
     }
 }

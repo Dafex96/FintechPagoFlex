@@ -15,6 +15,7 @@ import cl.duoc.ui.screens.EditarPerfilScreen
 import cl.duoc.ui.screens.InicioScreen
 import cl.duoc.ui.screens.LoginScreen
 import cl.duoc.ui.screens.PerfilScreen
+import cl.duoc.ui.screens.RecuperarContrasenaScreen
 import cl.duoc.ui.screens.RegistroScreen
 import cl.duoc.viewmodel.SesionViewModel
 
@@ -35,6 +36,7 @@ fun AppNavegacion() {
         composable(Ruta.Login.ruta) {
             LoginScreen(
                 onIrARegistro = { navController.navigate(Ruta.Registro.ruta) },
+                onIrARecuperarContrasena = { navController.navigate(Ruta.RecuperarContrasena.ruta) },
                 onLoginExitoso = { usuario ->
                     sesionViewModel.iniciarSesion(usuario)
                     navController.navigate(Ruta.Inicio.ruta) {
@@ -53,6 +55,14 @@ fun AppNavegacion() {
                     }
                 },
                 onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Ruta.RecuperarContrasena.ruta) {
+            RecuperarContrasenaScreen(
+                onVolverALogin = {
+                    navController.popBackStack(Ruta.Login.ruta, inclusive = false)
+                }
             )
         }
 
@@ -94,7 +104,7 @@ fun AppNavegacion() {
             EditarPerfilScreen(
                 onPerfilGuardado = { usuario ->
                     sesionViewModel.actualizarUsuario(usuario)
-                    Toast.makeText(context, context.getString(R.string.editar_guardado), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, R.string.editar_guardado, Toast.LENGTH_SHORT).show()
                     navController.popBackStack()
                 },
                 onVolver = { navController.popBackStack() }

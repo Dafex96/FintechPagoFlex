@@ -12,6 +12,7 @@ import cl.duoc.model.NuevoUsuario
 import cl.duoc.model.RolCodigo
 import cl.duoc.model.Usuario
 import cl.duoc.util.Fechas
+import cl.duoc.util.Rut
 import java.text.Collator
 import java.util.Locale
 
@@ -117,6 +118,22 @@ class PagoFlexDbHelper(context: Context) :
     fun actualizarAvatar(idUsuario: Long, avatar: ByteArray?): Int {
         val valores = ContentValues().apply {
             if (avatar != null) put("avatar", avatar) else putNull("avatar")
+        }
+        return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString()))
+    }
+
+    fun buscarUsuarioPorRutOCorreo(identificador: String): Usuario? {
+        val limpio = identificador.trim()
+        val rutNormalizado = if (Rut.esValido(limpio)) Rut.normalizar(limpio) else limpio
+        return consultarUsuarios(
+            "$SQL_SELECT_USUARIO WHERE U.RUT = ? OR LOWER(U.CORREO) = LOWER(?)",
+            arrayOf(rutNormalizado, limpio)
+        ).firstOrNull()
+    }
+
+    fun actualizarContrasena(idUsuario: Long, nuevaContrasenaHash: String): Int {
+        val valores = ContentValues().apply {
+            put("contrasena_hash", nuevaContrasenaHash)
         }
         return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString()))
     }

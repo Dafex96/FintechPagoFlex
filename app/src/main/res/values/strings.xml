@@ -285,4 +285,27 @@
     <string name="cd_rol_seleccion">Entrar con el rol %1$s</string>
     <string name="cd_alerta_atrasado">Reporte con más de dos días hábiles sin gestionar</string>
 
+    <!--Recuperación de contraseña-->
+    <string name="login_btn_olvide_contrasena">¿Olvidaste tu contraseña?</string>
+    <string name="recuperar_titulo">Recuperar contraseña</string>
+    <string name="recuperar_paso1_instrucciones">Ingresa tu RUT o correo registrado para recibir un código de verificación.</string>
+    <string name="recuperar_campo_identificador">RUT o Correo electrónico</string>
+    <string name="recuperar_btn_solicitar_codigo">Enviar código</string>
+    <string name="recuperar_paso2_instrucciones">Ingresa el código de 6 dígitos enviado a tu correo o teléfono.</string>
+    <string name="recuperar_codigo_demo_nota">Código de prueba para demostración: %1$s</string>
+    <string name="recuperar_campo_codigo">Código de verificación</string>
+    <string name="recuperar_btn_verificar_codigo">Verificar código</string>
+    <string name="recuperar_paso3_instrucciones">Crea tu nueva contraseña. Debe tener al menos 8 caracteres, combinando letras y números.</string>
+    <string name="recuperar_campo_nueva">Nueva contraseña</string>
+    <string name="recuperar_campo_confirmar">Confirmar nueva contraseña</string>
+    <string name="recuperar_btn_restablecer">Restablecer contraseña</string>
+    <string name="recuperar_exito_titulo">¡Contraseña restablecida!</string>
+    <string name="recuperar_exito_mensaje">Tu contraseña se ha actualizado correctamente. Ya puedes iniciar sesión con tus nuevas credenciales.</string>
+    <string name="recuperar_btn_ir_login">Ir a iniciar sesión</string>
+    <string name="error_identificador_invalido">Ingresa un RUT o correo válido</string>
+    <string name="error_usuario_no_encontrado">No encontramos una cuenta asociada a este RUT o correo</string>
+    <string name="error_codigo_invalido">El código ingresado es incorrecto</string>
+    <string name="error_contrasena_debil">La contraseña debe tener al menos 8 caracteres, letras y números</string>
+    <string name="error_contrasenas_distintas">Las contraseñas no coinciden</string>
+
 </resources>
