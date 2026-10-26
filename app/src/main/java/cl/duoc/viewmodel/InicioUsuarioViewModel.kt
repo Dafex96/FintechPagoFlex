@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import cl.duoc.data.PagoFlexDbHelper
 import cl.duoc.model.ResumenInicioUsuario
 import cl.duoc.notificaciones.AvisosScheduler
+import cl.duoc.util.Fechas
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,10 +20,13 @@ class InicioUsuarioViewModel(application: Application) : AndroidViewModel(applic
     private val _avisosActivos = MutableStateFlow(true)
     val avisosActivos: StateFlow<Boolean> = _avisosActivos.asStateFlow()
 
+    private val _ultimaActualizacion = MutableStateFlow("")
+    val ultimaActualizacion: StateFlow<String> = _ultimaActualizacion.asStateFlow()
+
     fun cargarDatos(idUsuario: Long) {
         _resumen.value = db.obtenerResumenInicioUsuario(idUsuario)
         _avisosActivos.value = db.obtenerPreferenciasAvisos(idUsuario).activos
-
+        _ultimaActualizacion.value = Fechas.aFechaHoraCorta(Fechas.ahoraIso())
         AvisosScheduler.verificarAhora(getApplication())
     }
 

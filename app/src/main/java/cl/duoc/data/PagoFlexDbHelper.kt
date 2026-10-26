@@ -6,9 +6,11 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import cl.duoc.model.AvisoAnticipacion
+import cl.duoc.model.BloqueoPago
 import cl.duoc.model.CambiosPerfil
 import cl.duoc.model.Compromiso
 import cl.duoc.model.Comuna
+import cl.duoc.model.DetalleCompromiso
 import cl.duoc.model.EstadoCompromisoId
 import cl.duoc.model.NuevoCompromisoEmpresa
 import cl.duoc.model.NuevoUsuario
@@ -16,6 +18,8 @@ import cl.duoc.model.PreferenciasAvisos
 import cl.duoc.model.Reconocimiento
 import cl.duoc.model.UsuarioReconocimiento
 import cl.duoc.model.EstadoRecomendacionId
+import cl.duoc.model.IndicadorCumplimiento
+import cl.duoc.model.MotivoAnulacionId
 import cl.duoc.model.Pago
 import cl.duoc.model.Reporte
 import cl.duoc.model.ResumenCobranza
@@ -61,7 +65,9 @@ class PagoFlexDbHelper(context: Context) :
             "SELECT P.ID_PAGO, P.NUMERO_COMPROBANTE, P.ID_COMPROMISO, P.FECHA_HORA, " +
                     "P.MONTO_PAGADO, P.ID_CANAL, CA.NOMBRE AS canal_nombre, " +
                     "P.ID_MEDIO_PAGO, MP.NOMBRE AS medio_pago_nombre, " +
-                    "E.NOMBRE_FANTASIA AS empresa_nombre, C.CONCEPTO, C.FOLIO AS folio_compromiso " +
+                    "E.NOMBRE_FANTASIA AS empresa_nombre, C.CONCEPTO, C.FOLIO AS folio_compromiso, " +
+                    "C.FECHA_VENCIMIENTO AS fecha_vencimiento, C.NUMERO_CUOTA AS numero_cuota, " +
+                    "C.TOTAL_CUOTAS AS total_cuotas " +
                     "FROM PAGO P " +
                     "INNER JOIN CANAL CA ON P.ID_CANAL = CA.ID_CANAL " +
                     "INNER JOIN MEDIO_PAGO MP ON P.ID_MEDIO_PAGO = MP.ID_MEDIO_PAGO " +
@@ -187,6 +193,7 @@ class PagoFlexDbHelper(context: Context) :
     }
 
     fun listarCompromisosUsuario(idUsuario: Long, filtroEstado: Long? = null): List<Compromiso> {
+        actualizarVencimientos()
         val sql = StringBuilder("$SQL_SELECT_COMPROMISO WHERE C.ID_USUARIO_FINAL = ?")
         val args = mutableListOf(idUsuario.toString())
         if (filtroEstado != null) {
@@ -203,22 +210,25 @@ class PagoFlexDbHelper(context: Context) :
 
     fun obtenerResumenInicioUsuario(idUsuario: Long): ResumenInicioUsuario {
         val compromisos = listarCompromisosUsuario(idUsuario)
+        val mesActual = Fechas.hoyIso().take(7)
         val pendientes = compromisos.filter { it.esPendiente }
         val vencidos = compromisos.filter { it.esVencido }
-        val total = (pendientes + vencidos).sumOf { it.montoTotal }
-        val proximo = (pendientes + vencidos).minByOrNull { it.fechaVencimiento }
+        val pendientesDelMes = pendientes.filter { it.fechaVencimiento.take(7) == mesActual }
 
         return ResumenInicioUsuario(
-            totalMes = total,
-            proximoCompromiso = proximo,
+            totalMes = (pendientesDelMes + vencidos).sumOf { it.montoTotal },
+            proximoCompromiso = pendientes.minByOrNull { it.fechaVencimiento },
             cantidadVencidos = vencidos.size,
             compromisosPendientes = pendientes,
-            compromisosVencidos = vencidos
+            compromisosVencidos = vencidos,
+            cumplimiento = calcularCumplimiento(idUsuario)
         )
     }
 
     fun registrarPago(idCompromiso: Long, idMedioPago: Long, idCanal: Long = 1): Pago {
+        actualizarVencimientos()
         val compromiso = buscarCompromisoPorId(idCompromiso) ?: error("Compromiso no encontrado")
+        bloqueoDePago(compromiso)?.let { throw IllegalStateException("Pago no permitido: $it") }
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -261,6 +271,8 @@ class PagoFlexDbHelper(context: Context) :
         )
 
     fun registrarReporte(idCompromiso: Long, idMotivo: Long, comentario: String?): Reporte {
+        val compromiso = buscarCompromisoPorId(idCompromiso) ?: error("Compromiso no encontrado")
+        check(compromiso.puedePagar) { "Este compromiso no se puede reportar" }
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -290,8 +302,27 @@ class PagoFlexDbHelper(context: Context) :
         }
     }
 
+    fun actualizarVencimientos() {
+        writableDatabase.execSQL(
+            "UPDATE compromiso SET " +
+                    "recargo_aplicado = (SELECT e.recargo_atraso FROM empresa_cliente e " +
+                    "WHERE e.id_empresa = compromiso.id_empresa), " +
+                    "id_estado_compromiso = ?, fecha_cambio_estado = ? " +
+                    "WHERE id_estado_compromiso = ? AND substr(fecha_vencimiento, 1, 10) < ?",
+            arrayOf<Any>(
+                EstadoCompromisoId.VENCIDO,
+                Fechas.ahoraIso(),
+                EstadoCompromisoId.PENDIENTE,
+                Fechas.hoyIso()
+            )
+        )
+    }
+
     fun obtenerReportePorCompromiso(idCompromiso: Long): Reporte? =
-        consultarReportes("$SQL_SELECT_REPORTE WHERE R.ID_COMPROMISO = ?", arrayOf(idCompromiso.toString())).firstOrNull()
+        consultarReportes(
+            "$SQL_SELECT_REPORTE WHERE R.ID_COMPROMISO = ? ORDER BY R.FECHA_CREACION DESC, R.ID_REPORTE DESC",
+            arrayOf(idCompromiso.toString())
+        ).firstOrNull()
 
     fun listarReportesUsuario(idUsuario: Long): List<Reporte> =
         consultarReportes(
@@ -305,62 +336,6 @@ class PagoFlexDbHelper(context: Context) :
             put("dias_anticipacion", diasAnticipacion)
         }
         return writableDatabase.update("usuario", valores, "id_usuario = ?", arrayOf(idUsuario.toString())) > 0
-    }
-
-    fun listarCompromisosEmpresa(idEmpresa: Long, filtroEstado: Long? = null): List<Compromiso> {
-        val sql = StringBuilder("$SQL_SELECT_COMPROMISO WHERE C.ID_EMPRESA = ?")
-        val args = mutableListOf(idEmpresa.toString())
-        if (filtroEstado != null) {
-            sql.append(" AND C.ID_ESTADO_COMPROMISO = ?")
-            args.add(filtroEstado.toString())
-        }
-        sql.append(" ORDER BY C.FECHA_VENCIMIENTO ASC")
-        return consultarCompromisos(sql.toString(), args.toTypedArray())
-    }
-
-    fun obtenerResumenCobranzaEmpresa(idEmpresa: Long): ResumenCobranza {
-        val compromisos = listarCompromisosEmpresa(idEmpresa)
-        var recaudado = 0
-        var pendiente = 0
-        var vencido = 0
-        var pagadosCount = 0
-        var pendientesCount = 0
-        var vencidosCount = 0
-        var anuladosCount = 0
-
-        val empresaNombre = compromisos.firstOrNull()?.empresaNombre ?: "Empresa"
-
-        compromisos.forEach { comp ->
-            when {
-                comp.esPagado -> {
-                    recaudado += comp.montoTotal
-                    pagadosCount++
-                }
-                comp.esPendiente -> {
-                    pendiente += comp.montoTotal
-                    pendientesCount++
-                }
-                comp.esVencido -> {
-                    vencido += comp.montoTotal
-                    vencidosCount++
-                }
-                comp.esAnulado -> {
-                    anuladosCount++
-                }
-            }
-        }
-
-        return ResumenCobranza(
-            empresaNombre = empresaNombre,
-            montoRecaudado = recaudado,
-            montoPendiente = pendiente,
-            montoVencido = vencido,
-            totalCompromisos = compromisos.size,
-            pagadosCount = pagadosCount,
-            pendientesCount = pendientesCount,
-            vencidosCount = vencidosCount,
-            anuladosCount = anuladosCount
-        )
     }
 
     fun registrarCompromisoEmpresa(idEmpresa: Long, idEjecutivo: Long, datos: NuevoCompromisoEmpresa): String {
@@ -399,9 +374,9 @@ class PagoFlexDbHelper(context: Context) :
                 put("id_usuario_final", idUsuarioFinal)
                 put("id_empresa", idEmpresa)
                 put("concepto", datos.concepto.trim())
-                if (datos.numeroCuota.isNotBlank()) put("numero_cuota", datos.numeroCuota.toInt())
-                if (datos.totalCuotas.isNotBlank()) put("total_cuotas", datos.totalCuotas.toInt())
-                put("monto", datos.monto.toInt())
+                if (datos.numeroCuota.isNotBlank()) put("numero_cuota", datos.numeroCuota.trim().toInt())
+                if (datos.totalCuotas.isNotBlank()) put("total_cuotas", datos.totalCuotas.trim().toInt())
+                put("monto", datos.monto.trim().toInt())
                 put("fecha_vencimiento", datos.fechaVencimiento)
                 put("id_estado_compromiso", EstadoCompromisoId.PENDIENTE)
                 put("recargo_aplicado", 0)
@@ -418,8 +393,17 @@ class PagoFlexDbHelper(context: Context) :
         }
     }
 
-    fun anularCompromisoEmpresa(idCompromiso: Long, idEjecutivo: Long, idMotivo: Long, comentario: String?): Boolean {
+    fun anularCompromisoEmpresa(
+        idCompromiso: Long,
+        idEjecutivo: Long,
+        idEmpresa: Long,
+        idMotivo: Long,
+        comentario: String?
+    ): Boolean {
         val compromiso = buscarCompromisoPorId(idCompromiso) ?: return false
+        if (compromiso.idEmpresa != idEmpresa) return false
+        if (!(compromiso.esPendiente || compromiso.esVencido || compromiso.esEnRevision)) return false
+        if (idMotivo == MotivoAnulacionId.OTRO.toLong() && comentario.isNullOrBlank()) return false
         if (compromiso.esPagado) {
             return false
         }
@@ -500,7 +484,6 @@ class PagoFlexDbHelper(context: Context) :
         return lista
     }
 
-    /** Guarda un reconocimiento. Devuelve false si la persona ya lo tenía (nunca se pisa ni se pierde, RN-16). */
     fun otorgarReconocimiento(idUsuario: Long, idReconocimiento: Int, fechaIso: String, motivo: String): Boolean {
         val valores = ContentValues().apply {
             put("id_usuario_final", idUsuario)
@@ -513,7 +496,6 @@ class PagoFlexDbHelper(context: Context) :
         ) != -1L
     }
 
-    /** Organizaciones recomendadas por la persona que ya se unieron: pares (nombre, fecha ISO del cambio de estado). */
     fun listarRecomendacionesQueSeUnieron(idUsuario: Long): List<Pair<String, String>> {
         val lista = mutableListOf<Pair<String, String>>()
         readableDatabase.rawQuery(
@@ -581,7 +563,10 @@ class PagoFlexDbHelper(context: Context) :
         medioPagoNombre = cursor.getString(cursor.getColumnIndexOrThrow("medio_pago_nombre")),
         empresaNombre = cursor.getString(cursor.getColumnIndexOrThrow("empresa_nombre")),
         concepto = cursor.getString(cursor.getColumnIndexOrThrow("concepto")),
-        folioCompromiso = cursor.getString(cursor.getColumnIndexOrThrow("folio_compromiso"))
+        folioCompromiso = cursor.getString(cursor.getColumnIndexOrThrow("folio_compromiso")),
+        fechaVencimiento = cursor.getString(cursor.getColumnIndexOrThrow("fecha_vencimiento")),
+        numeroCuota = cursor.largoONulo("numero_cuota")?.toInt(),
+        totalCuotas = cursor.largoONulo("total_cuotas")?.toInt()
     )
 
     private fun consultarReportes(sql: String, args: Array<String>?): List<Reporte> {
@@ -658,7 +643,6 @@ class PagoFlexDbHelper(context: Context) :
         return if (isNull(indice)) null else getLong(indice)
     }
 
-    /** Siguiente número correlativo con prefijo (ej. CPR-000454), calculado dentro de la transacción en curso. */
     private fun siguienteNumero(db: SQLiteDatabase, tabla: String, columna: String, prefijo: String, ancho: Int): String {
         val maximo = db.rawQuery(
             "SELECT MAX(CAST(SUBSTR($columna, ${prefijo.length + 1}) AS INTEGER)) FROM $tabla WHERE $columna LIKE ?",
@@ -674,4 +658,126 @@ class PagoFlexDbHelper(context: Context) :
         readableDatabase.rawQuery("SELECT ID_ROL FROM ROL WHERE CODIGO = ?", arrayOf(codigo)).use { cursor ->
             if (cursor.moveToFirst()) cursor.getLong(0) else error("No existe el rol $codigo")
         }
+
+    fun bloqueoDePago(c: Compromiso): BloqueoPago? = when {
+        c.esPagado -> BloqueoPago.Pagado
+        c.esAnulado -> BloqueoPago.Anulado
+        c.esEnRevision -> BloqueoPago.EnRevision
+        else -> compromisoPrevioSinPagar(c)?.let { BloqueoPago.PrimeroPagar(it) }
+    }
+
+    private fun compromisoPrevioSinPagar(c: Compromiso): Compromiso? = consultarCompromisos(
+        "$SQL_SELECT_COMPROMISO WHERE C.ID_USUARIO_FINAL = ? AND C.ID_EMPRESA = ? " +
+                "AND C.ID_ESTADO_COMPROMISO IN (?, ?) " +
+                "AND (C.FECHA_VENCIMIENTO < ? OR (C.FECHA_VENCIMIENTO = ? AND C.ID_COMPROMISO < ?)) " +
+                "ORDER BY C.FECHA_VENCIMIENTO ASC, C.ID_COMPROMISO ASC LIMIT 1",
+        arrayOf(
+            c.idUsuarioFinal.toString(), c.idEmpresa.toString(),
+            EstadoCompromisoId.PENDIENTE.toString(), EstadoCompromisoId.VENCIDO.toString(),
+            c.fechaVencimiento, c.fechaVencimiento, c.id.toString()
+        )
+    ).firstOrNull()
+
+    fun obtenerDetalleCompromiso(idCompromiso: Long, idUsuario: Long): DetalleCompromiso? {
+        actualizarVencimientos()
+        val c = buscarCompromisoPorId(idCompromiso) ?: return null
+        if (c.idUsuarioFinal != idUsuario) return null
+        val atraso = if (c.esVencido) (-(Fechas.diasHasta(c.fechaVencimiento) ?: 0)).coerceAtLeast(0) else 0
+        return DetalleCompromiso(
+            compromiso = c,
+            pago = obtenerPagoPorCompromiso(idCompromiso),
+            reporte = obtenerReportePorCompromiso(idCompromiso),
+            diasAtraso = atraso
+        )
+    }
+
+    fun calcularCumplimiento(idUsuario: Long): IndicadorCumplimiento {
+        actualizarVencimientos()
+        return readableDatabase.rawQuery(
+            "SELECT COUNT(*), " +
+                    "COALESCE(SUM(CASE WHEN P.ID_PAGO IS NOT NULL " +
+                    "AND substr(P.FECHA_HORA, 1, 10) <= substr(C.FECHA_VENCIMIENTO, 1, 10) THEN 1 ELSE 0 END), 0) " +
+                    "FROM COMPROMISO C LEFT JOIN PAGO P ON P.ID_COMPROMISO = C.ID_COMPROMISO " +
+                    "WHERE C.ID_USUARIO_FINAL = ? AND C.ID_ESTADO_COMPROMISO NOT IN (?, ?) " +
+                    "AND substr(C.FECHA_VENCIMIENTO, 1, 10) >= ? AND substr(C.FECHA_VENCIMIENTO, 1, 10) < ?",
+            arrayOf(
+                idUsuario.toString(),
+                EstadoCompromisoId.EN_REVISION.toString(), EstadoCompromisoId.ANULADO.toString(),
+                Fechas.haceMesesIso(12), Fechas.hoyIso()
+            )
+        ).use { cursor ->
+            if (cursor.moveToFirst()) IndicadorCumplimiento(cursor.getInt(0), cursor.getInt(1))
+            else IndicadorCumplimiento()
+        }
+    }
+
+    fun listarCompromisosEmpresa(
+        idEmpresa: Long,
+        filtroEstado: Long? = null,
+        mes: String? = null
+    ): List<Compromiso> {
+        actualizarVencimientos()
+        val sql = StringBuilder("$SQL_SELECT_COMPROMISO WHERE C.ID_EMPRESA = ?")
+        val args = mutableListOf(idEmpresa.toString())
+        if (filtroEstado != null) {
+            sql.append(" AND C.ID_ESTADO_COMPROMISO = ?")
+            args.add(filtroEstado.toString())
+        }
+        if (mes != null) {
+            sql.append(" AND substr(C.FECHA_VENCIMIENTO, 1, 7) = ?")
+            args.add(mes)
+        }
+        sql.append(" ORDER BY C.FECHA_VENCIMIENTO ASC")
+        return consultarCompromisos(sql.toString(), args.toTypedArray())
+    }
+
+    private fun nombreEmpresa(idEmpresa: Long): String =
+        readableDatabase.rawQuery(
+            "SELECT NOMBRE_FANTASIA FROM EMPRESA_CLIENTE WHERE ID_EMPRESA = ?",
+            arrayOf(idEmpresa.toString())
+        ).use { if (it.moveToFirst()) it.getString(0) else "Empresa" }
+
+    fun obtenerResumenCobranzaEmpresa(idEmpresa: Long, mes: String): ResumenCobranza {
+        val compromisos = listarCompromisosEmpresa(idEmpresa, mes = mes)
+        var recaudado = 0; var pendiente = 0; var vencido = 0
+        var pagados = 0; var pendientes = 0; var vencidos = 0; var enRevision = 0; var anulados = 0
+
+        compromisos.forEach { c ->
+            when {
+                c.esPagado -> { recaudado += c.montoTotal; pagados++ }
+                c.esPendiente -> { pendiente += c.montoTotal; pendientes++ }
+                c.esVencido -> { vencido += c.montoTotal; vencidos++ }
+                c.esEnRevision -> enRevision++
+                c.esAnulado -> anulados++
+            }
+        }
+        return ResumenCobranza(
+            empresaNombre = nombreEmpresa(idEmpresa),
+            mes = mes,
+            montoRecaudado = recaudado,
+            montoPendiente = pendiente,
+            montoVencido = vencido,
+            totalCompromisos = compromisos.size,
+            pagadosCount = pagados,
+            pendientesCount = pendientes,
+            vencidosCount = vencidos,
+            enRevisionCount = enRevision,
+            anuladosCount = anulados
+        )
+    }
+
+    fun existeCompromisoDuplicado(idEmpresa: Long, rutNormalizado: String, concepto: String, numeroCuota: Int?): Boolean {
+        val sql = StringBuilder(
+            "SELECT 1 FROM COMPROMISO C INNER JOIN USUARIO U ON C.ID_USUARIO_FINAL = U.ID_USUARIO " +
+                    "WHERE C.ID_EMPRESA = ? AND U.RUT = ? AND LOWER(C.CONCEPTO) = LOWER(?)"
+        )
+        val args = mutableListOf(idEmpresa.toString(), rutNormalizado, concepto)
+        if (numeroCuota == null) {
+            sql.append(" AND C.NUMERO_CUOTA IS NULL")
+        } else {
+            sql.append(" AND C.NUMERO_CUOTA = ?")
+            args.add(numeroCuota.toString())
+        }
+        return readableDatabase.rawQuery(sql.toString(), args.toTypedArray()).use { it.moveToFirst() }
+    }
 }

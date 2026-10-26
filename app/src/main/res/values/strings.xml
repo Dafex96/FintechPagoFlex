@@ -16,6 +16,14 @@
     <string name="sin_datos">Aún no hay nada por mostrar aquí.</string>
     <string name="error_generico">Algo no salió como esperábamos. Inténtalo de nuevo.</string>
     <string name="aviso_datos_ficticios">Versión de demostración con datos ficticios</string>
+    <string name="filtro_anio">Año</string>
+    <string name="filtro_mes">Mes</string>
+    <string name="btn_entendido">Entendido</string>
+    <string name="pago_bloqueado_titulo">Todavía no puedes pagar este compromiso</string>
+    <string name="error_fecha_invalida">Escribe la fecha como DD-MM-AAAA</string>
+    <string name="error_anulacion_comentario">Escribe un comentario para el motivo «Otro»</string>
+    <string name="error_no_se_pudo_registrar">No se pudo registrar el compromiso. Revisa los datos e inténtalo de nuevo.</string>
+    <string name="error_no_se_pudo_anular">No se pudo anular este compromiso.</string>
 
     <!--Sesion demo-->
     <string name="sesion_titulo">Elige cómo quieres entrar</string>

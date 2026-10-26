@@ -180,7 +180,7 @@ fun RegistrarCompromisoContent(
                         CampoTexto(
                             valor = nuevo.fechaVencimiento,
                             onValorCambia = { f -> onActualizar { it.copy(fechaVencimiento = f) } },
-                            etiqueta = "Fecha de vencimiento (Ej: 2026-11-15)",
+                            etiqueta = "Fecha de vencimiento (DD-MM-AAAA)",
                             icono = R.drawable.ic_check
                         )
                         Row(

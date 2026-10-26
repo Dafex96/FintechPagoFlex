@@ -30,4 +30,13 @@ object Rut {
             else -> resto.toString()
         }
     }
+
+    fun enmascarar(texto: String): String {
+        val normalizado = normalizar(texto)
+        val cuerpo = normalizado.substringBefore("-")
+        val dv = normalizado.substringAfter("-", "")
+        if (dv.isEmpty() || cuerpo.length < 2) return normalizado
+        val inicio = cuerpo.dropLast(6).ifEmpty { cuerpo.take(1) }
+        return "$inicio.*.*-$dv"
+    }
 }

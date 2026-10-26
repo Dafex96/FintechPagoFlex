@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.R
+import cl.duoc.model.CategoriaCumplimiento
 import cl.duoc.model.Compromiso
 import cl.duoc.model.ResumenInicioUsuario
 import cl.duoc.model.Usuario
@@ -147,6 +148,36 @@ fun InicioUsuarioContent(
                                 modifier = Modifier.padding(horizontal = Dimens.espacioMedio, vertical = Dimens.espacioChico)
                             )
                         }
+                    }
+                }
+
+                TarjetaSeccion(titulo = stringResource(R.string.cumplimiento_titulo)) {
+                    val indicador = resumen.cumplimiento
+                    if (!indicador.suficiente) {
+                        Text(
+                            text = stringResource(R.string.cumplimiento_insuficiente),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        val porcentaje = String.format(Locale.forLanguageTag("es-CL"), "%.1f", indicador.porcentaje)
+                        Text(
+                            text = stringResource(R.string.cumplimiento_porcentaje, porcentaje),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        val categoria = when (indicador.categoria) {
+                            CategoriaCumplimiento.EJEMPLAR -> stringResource(R.string.categoria_ejemplar)
+                            CategoriaCumplimiento.AL_DIA -> stringResource(R.string.categoria_al_dia)
+                            CategoriaCumplimiento.EN_CAMINO -> stringResource(R.string.categoria_en_camino)
+                            null -> ""
+                        }
+                        Text(text = categoria, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = stringResource(R.string.cumplimiento_detalle, indicador.aTiempo, indicador.considerados),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 

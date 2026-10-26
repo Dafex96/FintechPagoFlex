@@ -45,8 +45,10 @@ import cl.duoc.model.EstadoCompromisoId
 import cl.duoc.model.Usuario
 import cl.duoc.ui.components.BotonPrincipal
 import cl.duoc.ui.components.BotonSecundario
+import cl.duoc.ui.components.SelectorDesplegable
 import cl.duoc.ui.styles.EstilosTarjeta
 import cl.duoc.ui.theme.Dimens
+import cl.duoc.util.Fechas
 import cl.duoc.viewmodel.EjecutivoUiState
 import cl.duoc.viewmodel.EjecutivoViewModel
 import java.text.NumberFormat
@@ -163,6 +165,16 @@ fun EmpresaCompromisosContent(
                         onClick = { onCambiarFiltro(EstadoCompromisoId.PAGADO.toLong()) },
                         label = { Text("Pagados") }
                     )
+                    FilterChip(
+                        selected = uiState.filtroEstado == EstadoCompromisoId.EN_REVISION.toLong(),
+                        onClick = { onCambiarFiltro(EstadoCompromisoId.EN_REVISION.toLong()) },
+                        label = { Text("En revisión") }
+                    )
+                    FilterChip(
+                        selected = uiState.filtroEstado == EstadoCompromisoId.ANULADO.toLong(),
+                        onClick = { onCambiarFiltro(EstadoCompromisoId.ANULADO.toLong()) },
+                        label = { Text("Anulados") }
+                    )
                 }
 
                 if (uiState.compromisos.isEmpty()) {
@@ -219,6 +231,21 @@ fun EmpresaCompromisosContent(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+
+                                uiState.reportes[compromiso.id]?.let { reporte ->
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(
+                                            text = stringResource(R.string.ejecutivo_reporte_asociado),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "${reporte.motivoNombre} · ${reporte.estadoNombre}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        reporte.comentario?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+                                    }
+                                }
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -277,7 +304,12 @@ fun EmpresaCompromisosContent(
                     OutlinedTextField(
                         value = uiState.comentarioAnulacion,
                         onValueChange = onComentarioAnulacionCambia,
-                        label = { Text(stringResource(R.string.anulacion_comentario_hint)) },
+                        label = {
+                            Text(
+                                stringResource(R.string.anulacion_comentario_hint) +
+                                        if (uiState.motivoAnulacionSeleccionado == 4L) " *" else ""
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

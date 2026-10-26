@@ -27,6 +27,9 @@ import cl.duoc.ui.screens.RecuperarContrasenaScreen
 import cl.duoc.ui.screens.RegistroScreen
 import cl.duoc.ui.screens.RegistrarCompromisoScreen
 import cl.duoc.viewmodel.SesionViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import cl.duoc.ui.screens.DetalleCompromisoScreen
 
 @Composable
 fun AppNavegacion(
@@ -146,6 +149,21 @@ fun AppNavegacion(
         composable(Ruta.Compromisos.ruta) {
             usuarioActual?.let { usuario ->
                 MisCompromisosScreen(
+                    usuario = usuario,
+                    onVolver = { navController.popBackStack() },
+                    onVerDetalle = { id -> navController.navigate(Ruta.DetalleCompromiso.crear(id)) }
+                )
+            }
+        }
+
+        composable(
+            route = Ruta.DetalleCompromiso.ruta,
+            arguments = listOf(navArgument("idCompromiso") { type = NavType.LongType })
+        ) { entrada ->
+            val id = entrada.arguments?.getLong("idCompromiso") ?: return@composable
+            usuarioActual?.let { usuario ->
+                DetalleCompromisoScreen(
+                    idCompromiso = id,
                     usuario = usuario,
                     onVolver = { navController.popBackStack() }
                 )

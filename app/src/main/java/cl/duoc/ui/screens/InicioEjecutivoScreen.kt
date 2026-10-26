@@ -154,6 +154,12 @@ fun InicioEjecutivoContent(
                             Text("Tasa de Cobranza:")
                             Text(String.format(Locale.forLanguageTag("es-CL"), "%.1f %%", resumen.tasaCobranza), fontWeight = FontWeight.Bold)
                         }
+                        Row(modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("En revisión:")
+                            Text(resumen.enRevisionCount.toString(), fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 

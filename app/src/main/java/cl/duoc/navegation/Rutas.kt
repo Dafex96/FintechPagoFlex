@@ -13,4 +13,7 @@ sealed class Ruta(val ruta: String) {
     data object EditarPerfil : Ruta("editar_perfil")
     data object Reconocimientos : Ruta("reconocimientos")
     data object Avisos : Ruta("avisos")
+    data object DetalleCompromiso : Ruta("detalle_compromiso/{idCompromiso}") {
+        fun crear(id: Long) = "detalle_compromiso/$id"
+    }
 }

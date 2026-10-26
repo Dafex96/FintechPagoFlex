@@ -48,11 +48,17 @@ import cl.duoc.viewmodel.MisCompromisosUiState
 import cl.duoc.viewmodel.MisCompromisosViewModel
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import cl.duoc.model.BloqueoPago
+import cl.duoc.model.MotivoReporteId
+import cl.duoc.util.Fechas
 
 @Composable
 fun MisCompromisosScreen(
     usuario: Usuario,
     onVolver: () -> Unit,
+    onVerDetalle: (Long) -> Unit,
     viewModel: MisCompromisosViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +70,8 @@ fun MisCompromisosScreen(
     MisCompromisosContent(
         uiState = uiState,
         onVolver = onVolver,
+        onVerDetalle = onVerDetalle,
+        onCerrarBloqueo = viewModel::cerrarBloqueo,
         onCambiarFiltro = viewModel::cambiarFiltro,
         onSeleccionarCompromisoParaPagar = viewModel::seleccionarCompromisoParaPagar,
         onSeleccionarMedioPago = viewModel::seleccionarMedioPago,
@@ -76,11 +84,13 @@ fun MisCompromisosScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MisCompromisosContent(
     uiState: MisCompromisosUiState,
     onVolver: () -> Unit,
+    onVerDetalle: (Long) -> Unit,
+    onCerrarBloqueo: () -> Unit,
     onCambiarFiltro: (Long?) -> Unit,
     onSeleccionarCompromisoParaPagar: (Compromiso?) -> Unit,
     onSeleccionarMedioPago: (Long) -> Unit,
@@ -127,25 +137,16 @@ fun MisCompromisosContent(
                     .padding(horizontal = Dimens.espacioPantalla, vertical = Dimens.espacioChico),
                 verticalArrangement = Arrangement.spacedBy(Dimens.espacioMedio)
             ) {
-                Row(
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilterChip(
-                        selected = uiState.filtroEstado == null,
-                        onClick = { onCambiarFiltro(null) },
-                        label = { Text("Todos") }
-                    )
-                    FilterChip(
-                        selected = uiState.filtroEstado == EstadoCompromisoId.PENDIENTE.toLong(),
-                        onClick = { onCambiarFiltro(EstadoCompromisoId.PENDIENTE.toLong()) },
-                        label = { Text("Pendientes") }
-                    )
-                    FilterChip(
-                        selected = uiState.filtroEstado == EstadoCompromisoId.VENCIDO.toLong(),
-                        onClick = { onCambiarFiltro(EstadoCompromisoId.VENCIDO.toLong()) },
-                        label = { Text("Vencidos") }
-                    )
+                    FilterChip(selected = uiState.filtroEstado == null, onClick = { onCambiarFiltro(null) }, label = { Text("Todos") })
+                    FilterChip(selected = uiState.filtroEstado == EstadoCompromisoId.PENDIENTE.toLong(), onClick = { onCambiarFiltro(EstadoCompromisoId.PENDIENTE.toLong()) }, label = { Text("Pendientes") })
+                    FilterChip(selected = uiState.filtroEstado == EstadoCompromisoId.VENCIDO.toLong(), onClick = { onCambiarFiltro(EstadoCompromisoId.VENCIDO.toLong()) }, label = { Text("Vencidos") })
+                    FilterChip(selected = uiState.filtroEstado == EstadoCompromisoId.EN_REVISION.toLong(), onClick = { onCambiarFiltro(EstadoCompromisoId.EN_REVISION.toLong()) }, label = { Text("En revisión") })
+                    FilterChip(selected = uiState.filtroEstado == EstadoCompromisoId.PAGADO.toLong(), onClick = { onCambiarFiltro(EstadoCompromisoId.PAGADO.toLong()) }, label = { Text("Pagados") })
                 }
 
                 if (uiState.compromisos.isEmpty()) {
@@ -159,6 +160,7 @@ fun MisCompromisosContent(
                         TarjetaCompromiso(
                             compromiso = compromiso,
                             formatoMoneda = formatoMoneda,
+                            onVerDetalle = { onVerDetalle(compromiso.id) },
                             onPagar = { onSeleccionarCompromisoParaPagar(compromiso) },
                             onReportar = { onSeleccionarCompromisoParaReportar(compromiso) }
                         )
@@ -253,7 +255,17 @@ fun MisCompromisosContent(
                     OutlinedTextField(
                         value = uiState.comentarioReporte,
                         onValueChange = onComentarioReporteCambia,
-                        label = { Text("Cuéntanos más (opcional)") },
+                        label = {
+                            Text(
+                                stringResource(
+                                    if (uiState.motivoReporteSeleccionado == MotivoReporteId.OTRO.toLong())
+                                        R.string.reporte_comentario_obligatorio_hint
+                                    else R.string.reporte_comentario_hint
+                                )
+                            )
+                        },
+                        isError = uiState.errorReporte != null,
+                        supportingText = { uiState.errorReporte?.let { Text(it) } },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -278,10 +290,14 @@ fun MisCompromisosContent(
             title = { Text(text = "¡Pago realizado!") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "Comprobante: ${pago.numeroComprobante}")
-                    Text(text = "Monto pagado: ${formatoMoneda.format(pago.montoPagado)}")
-                    Text(text = "Medio: ${pago.medioPagoNombre}")
+                    Text(text = "Comprobante: ${pago.numeroComprobante}", fontWeight = FontWeight.Bold)
                     Text(text = "Empresa: ${pago.empresaNombre}")
+                    Text(text = "${pago.concepto}${pago.textoCuota?.let { " · $it" } ?: ""}")
+                    Text(text = "Folio: ${pago.folioCompromiso}")
+                    Text(text = "Monto pagado: ${formatoMoneda.format(pago.montoPagado)}")
+                    Text(text = "Medio: ${pago.medioPagoNombre} · Canal: ${pago.canalNombre}")
+                    Text(text = "Fecha y hora: ${Fechas.aFechaHoraCorta(pago.fechaHora)}")
+                    Text(text = "Estado: Pago confirmado")
                 }
             },
             confirmButton = {
@@ -311,6 +327,28 @@ fun MisCompromisosContent(
             }
         )
     }
+
+    uiState.bloqueoPago?.let { bloqueo ->
+        val mensaje = when (bloqueo) {
+            BloqueoPago.EnRevision -> stringResource(R.string.pago_bloqueado_revision)
+            BloqueoPago.Anulado -> stringResource(R.string.pago_bloqueado_anulado)
+            BloqueoPago.Pagado -> stringResource(R.string.pago_bloqueado_pagado)
+            is BloqueoPago.PrimeroPagar -> {
+                val previo = bloqueo.previo
+                val cuota = if (previo.numeroCuota != null && previo.totalCuotas != null)
+                    "${previo.numeroCuota}/${previo.totalCuotas}" else previo.concepto
+                stringResource(R.string.pago_bloqueado_orden, cuota, previo.empresaNombre)
+            }
+        }
+        AlertDialog(
+            onDismissRequest = onCerrarBloqueo,
+            title = { Text(stringResource(R.string.pago_bloqueado_titulo)) },
+            text = { Text(mensaje) },
+            confirmButton = {
+                BotonPrincipal(texto = stringResource(R.string.btn_entendido), onClick = onCerrarBloqueo)
+            }
+        )
+    }
 }
 
 @Composable
@@ -318,9 +356,11 @@ private fun TarjetaCompromiso(
     compromiso: Compromiso,
     formatoMoneda: NumberFormat,
     onPagar: () -> Unit,
-    onReportar: () -> Unit
+    onReportar: () -> Unit,
+    onVerDetalle: () -> Unit
 ) {
     Card(
+        onClick = onVerDetalle,
         modifier = Modifier.fillMaxWidth(),
         shape = EstilosTarjeta.forma,
         colors = EstilosTarjeta.colores()
@@ -367,6 +407,14 @@ private fun TarjetaCompromiso(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            if (compromiso.esEnRevision) {
+                Text(
+                    text = stringResource(R.string.reporte_existente),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Row(
                 modifier = Modifier
